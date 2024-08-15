@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forgot?</title>
+    <link rel="stylesheet" href="forgot.css">
+    <link rel="shortcut icon" href="./image/user.png" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <style>
+        
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #000000; /* Black background */
+    overflow: hidden;
+}
+
+.container {
+    max-width: 440px;
+    padding: 0 20px;
+    margin: 140px auto;
+}
+
+.whole {
+    width: 100%;
+    background: #2c2c2c; /* Dark grey background */
+    border-radius: 5px;
+    box-shadow: 8px 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.whole .title {
+    background: #ffd700; /* Dark yellow (gold) */
+    line-height: 80px;
+    font-size: 29px;
+    font-weight: 700;
+    text-align: center;
+    border-radius: 5px 5px 0 0 ;
+    color: #000000; /* Black text */
+    padding: 0;
+    cursor: default;
+}
+
+.title span {
+    filter: drop-shadow(5px 3px 2px rgba(0, 0, 0, 0.3));
+}
+
+.whole form {
+    padding: 30px 20px 25px 25px;
+}
+
+form p {
+    font-size: 13px;
+    margin-bottom: 20px;
+    color: #ffd700; /* Dark yellow (gold) text */
+}
+
+.whole form .row {
+    height: 45px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.whole form .row input {
+    height: 100%;
+    width: 100%;
+    padding: 0 10px 0 50px;
+    border-radius: 5px;
+    border: 1px solid #555; /* Dark grey border */
+    outline: none;
+    transition: all 0.3s ease;
+    background-color: #333; /* Dark background for inputs */
+    color: #ffd700; /* Dark yellow (gold) text */
+}
+
+form .row input:focus {
+    border-color: #ffd700; /* Dark yellow (gold) border on focus */
+    box-shadow: inset 0 0 2px 2px rgba(255, 215, 0, 0.25); /* Gold shadow */
+}
+
+.whole form .row i {
+    position: absolute;
+    width: 40px;
+    height: 100%;
+    background-color: #ffd700; /* Dark yellow (gold) background */
+    color: #000000; /* Black icon color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    border-radius: 5px 0 0 5px;
+}
+
+.whole form .botton input {
+    border: none;
+    padding: 0;
+    background: #ffd700; 
+    color: #000000; 
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in;
+}
+
+.whole form .botton input:hover {
+    background-color: #e5c100; 
+    border: 2px solid #ffd700; 
+}
+
+.whole form .signup_link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 15px;
+}
+
+.whole form .signup_link a {
+    text-decoration: none;
+    color: #ffd700;
+}
+
+.whole form .signup_link a:hover {
+    text-decoration: underline;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="whole">
+            <div class="title"><span>Forgot Password?</span></div>
+            
+            <form action="changepass" method="post">
+                {% csrf_token %}
+        
+        {% if step == '1' %}
+        <p>Enter the Phone Number associated with your account and we'll help you to reset your password.</p>
+        <div class="row">
+            <i class="fas fa-phone"></i>
+            <input type="text" name="num" placeholder="Phone" required>
+        </div>
+        <input type="hidden" name="step" value="1">
+        <div class="row botton">
+            <input type="submit" value="Continue">
+        </div>
+        {% elif step == '2' %}
+        <p>Please enter your new password.</p>
+        <input type="hidden" name="num" value="{{ num }}">
+        <div class="row">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="new_password" placeholder="New Password" required>
+        </div>
+        <div class="row">
+            <i class="fas fa-lock"></i>
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+        </div>
+        <input type="hidden" name="step" value="2">
+        <div class="row botton">
+            <input type="submit" value="Reset Password">
+        </div>
+        {% endif %}
+    </form>
+
+    {% if error_message %}
+    <script>
+        alert('{{ error_message }}');
+    </script>
+    {% endif %}
+    {% if success_message %}
+    <script>
+        alert('{{ success_message }}');
+    </script>
+    {% endif %}
+        </div>
+    </div>
+</body>
+</html>
