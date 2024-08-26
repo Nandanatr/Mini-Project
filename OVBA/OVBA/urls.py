@@ -24,11 +24,27 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.first),
-    path('login',views.second),
+    path('trylog',views.second),
     path('reg',views.Register),
     path('log',views.Login),
     path('forgetpass',views.openforget),
     path('changepass',views.change_password),
+    path('profile',views.profile),
+    path('sreg',views.openshopreg),
+    path('shopreg',views.shopreg),
+    path('vreq',views.shoprequest),
+    path('afreq',views.afterorder),
+    path('book',views.book),
+    #  path('book-mechanic/', views.book_mechanic, name='book_mechanic'),
+    path('adreq',views.openrequest),
+    path('accept_shop/', views.accept_shop, name='accept_shop'),
+    path('reject_shop/', views.reject_shop, name='reject_shop'),
+    path('aduser',views.view_user),
+    path('adowner',views.view_mech),
+    path('add',views.add_workeropen),
+    
+    
+    
     
     
     

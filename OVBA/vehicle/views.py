@@ -7,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 import re
 from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_exempt
 
 
 
@@ -80,22 +81,43 @@ def Login(request):
         
         data = register.objects.filter(username=Uname, password=Pass)
         
-        if data.exists():
-            for i in data:
-                if i.usertype == 'vehicleOwner':
-                    return render(request, 'index.html')
-                elif i.usertype == 'mechanicOwner':
-                    return render(request, 'mindex.html')
-                elif Uname == adminuser and Pass == adminpass:
-                    return render(request, 'adminhome.html')
-                
+        
+        if data.filter(usertype = 'vehicleOwner'):
+                    # return render(request, 'index.html')
+                     request.session['uid'] = Uname
+                     return redirect(profile)
+        elif data.filter(usertype =  'mechanicOwner'):
+                     request.session['mid'] = Uname
+                     return redirect(profile)
+                    # return render(request, 'mindex.html')
+        elif Uname == adminuser and Pass == adminpass:
+                     request.session['aid'] = Uname
+                     return redirect(profile)
+                    # return render(request, 'adminhome.html')
+        else:       
             messages.error(request, 'Incorrect username or password')
-        else:
-            messages.error(request, 'Incorrect username or password')
+           
     
     return render(request, 'login.html')
 
-
+def profile(request):
+    if 'uid' in request.session:
+        data = request.session['uid']
+        data1 = register.objects.filter(username=data)
+        return render(request, 'index.html')
+    elif 'mid' in request.session:
+        data = request.session['mid']
+        data2 = register.objects.filter(username=data)
+        return render(request, 'mindex.html')
+    elif 'aid' in request.session:
+        data = request.session['aid']
+        data3 = register.objects.filter(username=data)
+        num_of_user = register.objects.filter(usertype='vehicleOwner').count()
+        num_of_owner = register.objects.filter(usertype='mechanicOwner').count()
+        
+        return render(request, 'admin.html',{'nuser':num_of_user,'nowner':num_of_owner})
+    else:
+            return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
 def openforget(request):
     return render(request, 'forget.html', {'step': '1'})
 
@@ -154,3 +176,164 @@ def change_password(request):
             })
 
     return render(request, 'forget.html', {'step': '1'})
+def openshopreg(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
+        
+        try:
+           
+            user = register.objects.get(username=uname)
+        except register.DoesNotExist:
+            return HttpResponse('<script>alert("Invalid user."); window.history.back();</script>')
+        
+      
+        existing_shop = shopdetails.objects.filter(username=user).exists()
+
+        if existing_shop:
+           
+            return HttpResponse('<script>alert("You can only add one shop per user."); window.history.back();</script>')
+
+        data = register.objects.filter(username=uname)
+        return render(request, 'oshopreg.html', {'data': data})
+    
+    else:
+        return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
+def shopreg(request):
+    if 'mid' in request.session:
+        username = request.session['mid']
+        print('Session username:', username)
+        
+       
+        spname = request.POST.get('sname')
+        lnumb = request.POST.get('lnum')
+        plac = request.POST.get('place')
+        isstate = request.POST.get('istate')
+        ldat_str = request.POST.get('ida')
+        edat_str = request.POST.get('eda')
+        try:
+            user = get_object_or_404(register, username=username)
+            print('User:', user)
+        except register.DoesNotExist:
+            return render(request, 'shopreg.html', {'message': 'User not found.'})
+
+
+        registration = shopdetails.objects.create(
+            username=user,
+            shopname=spname,
+            lnumber=lnumb,
+            place=plac,
+            istate=isstate,
+            idate=ldat_str,
+            edate=edat_str,
+            status='pending' 
+        )
+        print('New registration:', registration) 
+        return render(request, 'succ.html', {'registration': registration})
+
+    else:
+       
+        return render(request, 'oshopreg.html', {'message': 'Something Went Wrong Please Try Again Later.'})
+    
+def afterorder(request):
+    return render(request,'mindex.html')
+            
+
+def shoprequest(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
+        # print('Session username:', username)
+        user = register.objects.get(username=uname)
+        print('username',user)
+        details = shopdetails.objects.filter(username=user)
+        print('details',details)
+        return render(request,'srequest.html',{'details':details})
+    else:
+        return render(request, 'login.html') 
+    
+def book(request):
+    return render(request,'book.html')
+        
+
+# def book_mechanic(request):
+#     if request.method == 'POST':
+#         vehicle_type = request.POST.get('vehicleType')
+#         issue = request.POST.get('issue')
+#         latitude = float(request.POST.get('latitude'))
+#         longitude = float(request.POST.get('longitude'))
+        
+#         # Save the booking
+#         Booking.objects.create(
+#             user=request.user,
+#             vehicle_type=vehicle_type,
+#             issue=issue,
+#             latitude=latitude,
+#             longitude=longitude
+#         )
+        
+#         return JsonResponse({'status': 'success'})
+    
+#     return JsonResponse({'status': 'error'}, status=400)
+
+def openrequest(request):
+    
+    data = shopdetails.objects.all()
+    return render(request,'request.html',{'shops':data})
+
+@csrf_exempt
+def accept_shop(request):
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        shop = get_object_or_404(shopdetails, id=request_id)
+        shop.status = 'confirmed'
+        shop.save()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+@csrf_exempt
+def reject_shop(request):
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        shop = get_object_or_404(shopdetails, id=request_id)
+        shop.delete()
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+
+def view_user(request):
+    data = register.objects.filter(usertype='vehicleOwner')
+    return render(request,'viewuser.html',{'users':data})
+
+
+
+def view_mech(request):
+    data = register.objects.filter(usertype='mechanicOwner')
+    return render(request,'viewmech.html',{'mech':data})
+
+
+def add_workeropen(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
+        
+        try:
+            
+            user = register.objects.get(username=uname)
+        except register.DoesNotExist:
+            return HttpResponse('<script>alert("Invalid user."); window.history.back();</script>')
+
+        try:
+           
+            user_shop = shopdetails.objects.get(username=user)
+        except shopdetails.DoesNotExist:
+            return HttpResponse('<script>alert("Shop details not found."); window.history.back();</script>')
+
+       
+        if user_shop.status != 'confirmed':
+            return HttpResponse('<script>alert("Your shop is not confirmed. You cannot access this page."); window.history.back();</script>')
+
+       
+        return render(request, 'addworker.html')
+    
+    else:
+        return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
+        

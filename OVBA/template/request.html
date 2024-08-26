@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Details</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .actions a {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <a href="javascript:history.back()" class="btn btn-primary back-button">
+            <i class="material-icons">arrow_back</i> Back
+        </a>
+        <h1>Shop Details</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Username</th>
+                    <th>Shop Name</th>
+                    <th>License Number</th>
+                    <th>Place</th>
+                    <th>State</th>
+                    <th>Issue Date</th>
+                    <th>Expiry Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shop in shops %}
+                    <tr id="row-{{ shop.id }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ shop.username }}</td>
+                        <td>{{ shop.shopname }}</td>
+                        <td>{{ shop.lnumber }}</td>
+                        <td>{{ shop.place }}</td>
+                        <td>{{ shop.istate }}</td>
+                        <td>{{ shop.idate }}</td>
+                        <td>{{ shop.edate }}</td>
+                        <td id="status-{{ shop.id }}">{{ shop.status }}</td>
+                        <td class="actions">
+                            <a href="#" class="btn btn-success btn-sm accept" data-id="{{ shop.id }}">
+                                <i class="material-icons">check</i>
+                            </a>
+                            <a href="#" class="btn btn-danger btn-sm reject" data-id="{{ shop.id }}">
+                                <i class="material-icons">close</i> 
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">No shop details available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            const csrftoken = getCookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            function handleAcceptClick(shopId) {
+                $.ajax({
+                    url: '{% url "accept_shop" %}',
+                    type: 'POST',
+                    data: {
+                        'request_id': shopId,
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#status-' + shopId).text('Confirmed');
+                        } else {
+                            alert('Failed to accept the request.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            }
+
+            function handleRejectClick(shopId) {
+                $.ajax({
+                    url: '{% url "reject_shop" %}',
+                    type: 'POST',
+                    data: {
+                        'request_id': shopId,
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#row-' + shopId).remove();
+                        } else {
+                            alert('Failed to reject the request.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            }
+
+            // Attach event handlers
+            $('a.accept').click(function(event) {
+                event.preventDefault();
+                const shopId = $(this).data('id');
+                handleAcceptClick(shopId);
+            });
+
+            $('a.reject').click(function(event) {
+                event.preventDefault();
+                const shopId = $(this).data('id');
+                handleRejectClick(shopId);
+            });
+        });
+    </script>
+</body>
+</html>

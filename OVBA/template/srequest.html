@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Styled Table Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff9c4; /* Light yellow background */
+
+        }
+        
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #000; /* Black border */
+        }
+        
+        th {
+            background-color: #ffeb3b; /* Bright yellow background for headings */
+            color: #000; /* Black text color for headings */
+        }
+        
+        td {
+            background-color: #fff; /* White background for data cells */
+            color: #333; /* Dark grey text color for data cells */
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fff9c4; /* Light yellow background for even rows */
+        }
+        
+        tr:nth-child(odd) {
+            background-color: #f0f0f0; /* Very light grey background for odd rows */
+        }
+        
+        footer {
+            background-color: #000; /* Black footer background */
+            color: #fff; /* White text color */
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    {% if details %}
+                    <th>Owner Name</th>
+                    <th>Shop Name</th>
+                    <th>License Number</th>
+                    <th>Place</th>
+                    <th>State</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in details %}
+                <tr>
+                    <th>{{i.username}}</th>
+                    <th>{{i.shopname}}</th>
+                    <th>{{i.lnumber}}</th>
+                    <th>{{i.place}}</th>
+                    <th>{{i.istate}}</th>
+                    <th>{{i.idate}}</th>
+                    <th>{{i.edate}}</th>
+                    <th>{{i.status}}</th>
+                   
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="9" class="no-data">No shop details available</td>
+                </tr>
+            </tbody>
+            {% endif %}
+        </table>
+    </div>
+    <footer>
+        <p>&copy; 2024 Your Company. All Rights Reserved.</p>
+    </footer>
+</body>
+</html>
