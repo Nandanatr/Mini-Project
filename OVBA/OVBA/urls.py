@@ -42,6 +42,9 @@ urlpatterns = [
     path('aduser',views.view_user),
     path('adowner',views.view_mech),
     path('add',views.add_workeropen),
+    path('addworker',views.addworker),
+    path('vwork',views.viewworker),
+    
     
     
     

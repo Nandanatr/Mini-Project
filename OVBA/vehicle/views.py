@@ -336,4 +336,67 @@ def add_workeropen(request):
     
     else:
         return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
+    
+
+def addworker(request):
+    if request.method == 'POST':
+        if 'mid' in request.session:
+            uname = request.session['mid']
+            
+            try:
+                user = register.objects.get(username=uname)
+            except register.DoesNotExist:
+                return HttpResponse('<script>alert("Invalid user."); window.history.back();</script>')
+
+ 
+            name = request.POST.get('name')
+            phone = request.POST.get('phone')
+            mail = request.POST.get('email')
+            adhar = request.POST.get('adhar')
+            special = request.POST.get('special')
+            area = request.POST.get('area')
+            city = request.POST.get('city')
+            state = request.POST.get('state')
+            pin = request.POST.get('pin')
+
+            try:
+                
+                workers = worker.objects.create(
+                    user=user,
+                    name=name,
+                    phone=phone,
+                    mail=mail,
+                    adhar=adhar,
+                    special=special,
+                    area=area,
+                    city=city,
+                    state=state,
+                    pin=pin
+                )
+                workers.save()
+                
+               
+                return render(request,'worksucc.html' ,{'data':workers}) 
+            except Exception as e:
+                return HttpResponse(f'<script>alert("An error occurred: {e}"); window.history.back();</script>')
+
+    return render(request, 'mindex.html')
+
+def viewworker(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
+        try:
+           
+            user = register.objects.get(username=uname)
+            
+          
+            workers = worker.objects.filter(user=user)
+            
+         
+            return render(request, 'viewworker.html', {'workers': workers})
         
+        except register.DoesNotExist:
+            return HttpResponse('<script>alert("User does not exist."); window.history.back();</script>')
+    
+    # Handle cases where 'mid' is not in the session
+    return render(request,'login.html')

@@ -56,12 +56,13 @@
 <body>
     <div class="container">
         <h1>Success!</h1>
-        <p>Your shop registration was completed successfully.</p>
-        <p>We will inform further updates</p>
+        {% if data %}
+        <p>successfully registered <b>{{data.name}}</b> as your Worker.</p>
         <a href="../../afreq">Return to Homepage</a>
+        {% endif %}
     </div>
     <footer>
-        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+        <p>&copy;<i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
     </footer>
 </body>
 </html>
