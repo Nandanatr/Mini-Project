@@ -41,10 +41,17 @@ class worker(models.Model):
     mail = models.EmailField()
     adhar = models.IntegerField()
     special = models.CharField(max_length=20)
-    area  = models.CharField(max_length=20)
-    city = models.CharField(max_length=20)
+    username  = models.CharField(max_length=20)
+    password = models.CharField(max_length=20)
     state = models.CharField(max_length=20)
     pin = models.IntegerField()
     def __str__(self):
         return self.name    
     
+class Certificate(models.Model):
+    shop = models.OneToOneField(shopdetails, on_delete=models.CASCADE)
+    issued_at = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='certificates/')
+    
+    def __str__(self):
+        return f"Certificate for {self.shop.shopname}"

@@ -77,7 +77,7 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.password }}</td>
                         <td>{{ user.usertype }}</td>
-                        <td><a href="reuser" class="btn btn-danger btn-sm reject">Remove</a></td>
+                        <td><a href="{% url 'remove_mech' user.id %}" class="btn btn-danger btn-sm reject">Remove</a></td>
                     </tr>
                 {% empty %}
                     <tr>

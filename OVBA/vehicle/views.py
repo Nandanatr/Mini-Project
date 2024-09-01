@@ -8,6 +8,15 @@ from django.core.validators import validate_email
 import re
 from django.contrib.auth.hashers import make_password
 from django.views.decorators.csrf import csrf_exempt
+from io import BytesIO
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Frame, PageBreak
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+from reportlab.lib.colors import black
+from reportlab.pdfgen import canvas
+from django.utils import timezone
+from django.core.files.base import ContentFile
 
 
 
@@ -78,7 +87,7 @@ def Login(request):
         Pass = request.POST.get('pass')
         adminuser = "admin"
         adminpass = "admin123"
-        
+
         data = register.objects.filter(username=Uname, password=Pass)
         
         
@@ -90,6 +99,10 @@ def Login(request):
                      request.session['mid'] = Uname
                      return redirect(profile)
                     # return render(request, 'mindex.html')
+        elif  worker.objects.filter(username=Uname , password=Pass):
+                    request.session['wid'] = Uname
+                    return redirect(profile)
+           
         elif Uname == adminuser and Pass == adminpass:
                      request.session['aid'] = Uname
                      return redirect(profile)
@@ -109,13 +122,17 @@ def profile(request):
         data = request.session['mid']
         data2 = register.objects.filter(username=data)
         return render(request, 'mindex.html')
+    elif 'wid' in request.session:
+        data = request.session['wid']
+        return render(request,'workindex.html')
     elif 'aid' in request.session:
         data = request.session['aid']
         data3 = register.objects.filter(username=data)
         num_of_user = register.objects.filter(usertype='vehicleOwner').count()
         num_of_owner = register.objects.filter(usertype='mechanicOwner').count()
+        num_of_worker = worker.objects.all().count()
         
-        return render(request, 'admin.html',{'nuser':num_of_user,'nowner':num_of_owner})
+        return render(request, 'admin.html',{'nuser':num_of_user,'nowner':num_of_owner,'nwork':num_of_worker})
     else:
             return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
 def openforget(request):
@@ -310,6 +327,9 @@ def view_mech(request):
     data = register.objects.filter(usertype='mechanicOwner')
     return render(request,'viewmech.html',{'mech':data})
 
+def view_work(request):
+    data = worker.objects.all()
+    return render(request,'viadminworker.html',{'worker':data})
 
 def add_workeropen(request):
     if 'mid' in request.session:
@@ -354,8 +374,8 @@ def addworker(request):
             mail = request.POST.get('email')
             adhar = request.POST.get('adhar')
             special = request.POST.get('special')
-            area = request.POST.get('area')
-            city = request.POST.get('city')
+            uname = request.POST.get('username')
+            wpass = request.POST.get('pass')
             state = request.POST.get('state')
             pin = request.POST.get('pin')
 
@@ -368,8 +388,8 @@ def addworker(request):
                     mail=mail,
                     adhar=adhar,
                     special=special,
-                    area=area,
-                    city=city,
+                    username=uname,
+                    password=wpass,
                     state=state,
                     pin=pin
                 )
@@ -400,3 +420,111 @@ def viewworker(request):
     
     # Handle cases where 'mid' is not in the session
     return render(request,'login.html')
+
+def mechpro(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
+      
+        user = register.objects.filter(username=uname)
+        return render(request,'mprofile.html',{'data':user})
+       
+    return render(request,'login.html')
+
+def upro(request):
+     if 'uid' in request.session:
+        uname = request.session['uid']
+      
+        user = register.objects.filter(username=uname)
+        return render(request,'uprofile.html',{'data':user})
+       
+     return render(request,'login.html')
+    
+
+def logout(request):
+    if 'uid' in request.session:
+        request.session.flush()
+        return render(request,'login.html')
+    elif 'mid' in request.session:
+        request.session.flush()
+        return render(request,'login.html')
+    elif 'aid' in request.session:
+        request.session.flush()
+        return render(request,'login.html')
+        
+def remove_worker(request, worker_id):
+    workers = get_object_or_404(worker, id=worker_id)
+    workers.delete()
+    return render(request,'sudele.html')
+
+def aftredele(reqest):
+    return redirect(profile)
+
+def remove_mech(request, mech_id):
+    mech = get_object_or_404(register, id=mech_id)
+    mech.delete()
+    return render(request,'sudele.html')
+
+def remove_user(request,user_id):
+    user = get_object_or_404(register, id=user_id)
+    user.delete()
+    return render(request,'sudele.html')
+
+def opencer(request):
+    data = shopdetails.objects.all()
+    return render(request,'certificate.html',{'data':data})
+
+def issue_certificate_view(request):
+    if request.method == 'POST':
+        shop_id = request.POST.get('shop_id')
+        if shop_id:
+            try:
+                shop = shopdetails.objects.get(id=shop_id)
+                
+                if not Certificate.objects.filter(shop=shop).exists():
+                    buffer = BytesIO()
+
+                    # Define the PDF document
+                    doc = SimpleDocTemplate(buffer, pagesize=letter)
+                    
+                    # Define styles
+                    styles = getSampleStyleSheet()
+                    title_style = ParagraphStyle('Title', parent=styles['Title'], fontName='Helvetica-Bold', fontSize=24, alignment=1, spaceAfter=12)
+                    body_style = ParagraphStyle('Body', parent=styles['Normal'], fontName='Helvetica', fontSize=14, alignment=1, spaceAfter=12)
+                    footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontName='Helvetica-Oblique', fontSize=12, alignment=1)
+
+                    # Content list
+                    elements = []
+
+                    # Add border
+                    border_frame = Frame(0.75 * inch, 0.75 * inch, 6.0 * inch, 9.5 * inch, showBoundary=0)
+                    
+                    def add_border(canvas, doc):
+                        canvas.saveState()
+                        canvas.setStrokeColor(black)
+                        canvas.setLineWidth(2)
+                        canvas.rect(0.5 * inch, 0.5 * inch, 7.5 * inch, 10.0 * inch)
+                        canvas.restoreState()
+                    
+                    # Add the border to the PDF
+                    doc.build(elements, onFirstPage=add_border, onLaterPages=add_border)
+
+                    # Add certificate content
+                    elements.append(Paragraph("Certificate of Registration", title_style))
+                    elements.append(Paragraph("This is to certify that", body_style))
+                    elements.append(Paragraph(f"<b>{shop.shopname}</b><br/><br/>Located at {shop.place}, {shop.istate}<br/><br/>has been registered and is recognized as a valid entity.<br/><br/>Issued on: {timezone.now().strftime('%Y-%m-%d')}", body_style))
+                    
+
+                    # Build the PDF
+                    doc.build(elements)
+
+                    # Save PDF to buffer
+                    buffer.seek(0)
+                    file_content = ContentFile(buffer.read(), 'certificate.pdf')
+                    Certificate.objects.create(shop=shop, file=file_content)
+                    
+                return HttpResponse("Certificate issued successfully.")
+            except shopdetails.DoesNotExist:
+                return HttpResponse("Shop not found.")
+    
+    shops = shopdetails.objects.all()
+    return render(request, 'certificate.html', {'data': shops})

@@ -77,7 +77,12 @@
                         <td>{{ user.username }}</td>
                         <td>{{ user.password }}</td>
                         <td>{{ user.usertype }}</td>
-                        <td><a href="reuser" class="btn btn-danger btn-sm reject">Remove</a></td>
+                        <td>
+                            <form action="{% url 'remove_user' user.id %}" method="post" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-remove">Remove</button>
+                            </form>
+                        </td>
                     </tr>
                 {% empty %}
                     <tr>

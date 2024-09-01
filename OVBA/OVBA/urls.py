@@ -41,9 +41,20 @@ urlpatterns = [
     path('reject_shop/', views.reject_shop, name='reject_shop'),
     path('aduser',views.view_user),
     path('adowner',views.view_mech),
+    path('adwork',views.view_work),
     path('add',views.add_workeropen),
     path('addworker',views.addworker),
     path('vwork',views.viewworker),
+    path('promech',views.mechpro),
+    path('upro',views.upro),
+    path('sout',views.logout),
+    path('remove/<int:worker_id>/', views.remove_worker, name='remove_worker'),
+    path('afdele',views.aftredele),
+    path('remove_mech/<int:mech_id>/',views.remove_mech, name='remove_mech'),
+    path('remove_user/<int:user_id>/',views.remove_user, name='remove_user'),
+    path('cer',views.opencer),
+     path('iscert', views.issue_certificate_view, name='issue_certificate'),
+    
     
     
     

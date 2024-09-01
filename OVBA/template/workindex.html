@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mechanic Dashboard</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #34495e;
+        }
+        
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0 0 0;
+        }
+        
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        
+        nav ul li a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+        
+        main {
+            padding: 20px;
+            max-width: 1000px;
+            margin: auto;
+        }
+        
+        section {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .tasks ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .tasks ul li {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        
+        .tasks ul li a {
+            color: #2980b9;
+            text-decoration: none;
+        }
+        
+        .tasks ul li a:hover {
+            text-decoration: underline;
+        }
+        
+        footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 10px;
+            border-top: 2px solid #34495e;
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Welcome, [Worker's Name]!</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#">Profile</a></li>
+                <li><a href="#">Tasks</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="overview">
+            <h2>Your Overview</h2>
+            <p>Here you can find a summary of your recent activities and tasks.</p>
+        </section>
+        <section class="tasks">
+            <h2>Your Tasks</h2>
+            <ul>
+                <li>Task 1: Description of task 1 <a href="#">View Details</a></li>
+                <li>Task 2: Description of task 2 <a href="#">View Details</a></li>
+                <li>Task 3: Description of task 3 <a href="#">View Details</a></li>
+                <!-- Add more tasks as needed -->
+            </ul>
+        </section>
+        <section class="profile">
+            <h2>Your Profile</h2>
+            <p>Manage your profile information here.</p>
+            <a href="#">Edit Profile</a>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2024 Mechanic Services Inc.</p>
+    </footer>
+</body>
+</html>
