@@ -24,6 +24,14 @@ class shopdetails(models.Model):
     def __str__(self):
         return self.shopname
     
+class service(models.Model):
+    user = models.ForeignKey(register, on_delete=models.CASCADE)
+    vehicle = models.CharField(max_length=20)
+    date = models.DateField()
+    time = models.TimeField()
+    status = models.CharField(max_length=20)
+    cash = models.IntegerField()
+    
 class Booking(models.Model):
     user = models.ForeignKey(register, on_delete=models.CASCADE)
     vehicle_type = models.CharField(max_length=100)

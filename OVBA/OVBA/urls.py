@@ -53,7 +53,7 @@ urlpatterns = [
     path('remove_mech/<int:mech_id>/',views.remove_mech, name='remove_mech'),
     path('remove_user/<int:user_id>/',views.remove_user, name='remove_user'),
     path('cer',views.opencer),
-     path('iscert', views.issue_certificate_view, name='issue_certificate'),
+    path('iscert', views.issue_certificate_view, name='issue_certificate'),
     
     
     
