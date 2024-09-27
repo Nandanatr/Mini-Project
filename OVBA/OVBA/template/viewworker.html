@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Workers</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff9c4; /* Light yellow background */
+        }
+        
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #000; /* Black border */
+        }
+        
+        th {
+            background-color: #ffeb3b; /* Bright yellow background for headings */
+            color: #000; /* Black text color for headings */
+        }
+        
+        td {
+            background-color: #fff; /* White background for data cells */
+            color: #333; /* Dark grey text color for data cells */
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fff9c4; /* Light yellow background for even rows */
+        }
+        
+        tr:nth-child(odd) {
+            background-color: #f0f0f0; /* Very light grey background for odd rows */
+        }
+        
+        footer {
+            background-color: #000; /* Black footer background */
+            color: #fff; /* White text color */
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="javascript:history.back()" class="btn btn-primary back-button">
+            <i class="material-icons"></i> Back
+        </a>
+        <h2>Workers Registered by You</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Phone Number</th>
+                    <th>Email Address</th>
+                    <th>Adhar Number</th>
+                    <th>Specialization</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>State</th>
+                    <th>Post Code</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for worker in workers %}
+                <tr>
+                    <td>{{ worker.name }}</td>
+                    <td>{{ worker.phone }}</td>
+                    <td>{{ worker.mail }}</td>
+                    <td>{{ worker.adhar }}</td>
+                    <td>{{ worker.special }}</td>
+                    <td>{{ worker.username }}</td>
+                    <td>{{ worker.password }}</td>
+                    <td>{{ worker.state }}</td>
+                    <td>{{ worker.pin }}</td>
+                    
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="no-workers">No workers found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <footer>
+        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+    </footer>
+</body>
+</html>

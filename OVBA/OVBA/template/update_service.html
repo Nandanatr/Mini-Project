@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff9c4; /* Light yellow background */
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .form-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .form-header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .submit-btn {
+            background-color: #ffeb3b;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background-color: #fdd835;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h1>Update Service</h1>
+        </div>
+        <form method="POST" action="{% url 'update_service' service.id %}">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="status" class="form-label">Status</label>
+                <input id="status" class="form-control" type="text" name="status" value="{{ service.status }}" required>
+            </div>
+            <div class="form-group">
+                <label for="cash" class="form-label">Cash</label>
+                <input id="cash" class="form-control" type="number" name="cash" value="{{ service.cash }}" required>
+            </div>
+            <button class="submit-btn" type="submit">Update</button>
+        </form>
+     
+    </div>
+</body>
+</html>

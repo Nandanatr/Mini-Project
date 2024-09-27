@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Details</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff9c4; /* Light yellow background */
+        }
+        
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #000; /* Black border */
+        }
+        
+        th {
+            background-color: #ffeb3b; /* Bright yellow background for headings */
+            color: #000; /* Black text color for headings */
+        }
+        
+        td {
+            background-color: #fff; /* White background for data cells */
+            color: #333; /* Dark grey text color for data cells */
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fff9c4; /* Light yellow background for even rows */
+        }
+        
+        tr:nth-child(odd) {
+            background-color: #f0f0f0; /* Very light grey background for odd rows */
+        }
+        
+        footer {
+            background-color: #000; /* Black footer background */
+            color: #fff; /* White text color */
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+  
+    <div class="container">
+        <a href="javascript:history.back()" class="btn btn-primary back-button">
+            <i class="material-icons">arrow_back</i> Back
+        </a>
+        <h1>Shop Details</h1>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Username</th>
+                    <th>Shop Name</th>
+                    <th>License Number</th>
+                    <th>Place</th>
+                    <th>State</th>
+                    <th>Issue Date</th>
+                    <th>Expiry Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for shop in shops %}
+                    <tr id="row-{{ shop.id }}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ shop.username }}</td>
+                        <td>{{ shop.shopname }}</td>
+                        <td>{{ shop.lnumber }}</td>
+                        <td>{{ shop.place }}</td>
+                        <td>{{ shop.istate }}</td>
+                        <td>{{ shop.idate }}</td>
+                        <td>{{ shop.edate }}</td>
+                        <td id="status-{{ shop.id }}">{{ shop.status }}</td>
+                        <td class="actions">
+                            <a href="accept_shop" class="btn btn-success btn-sm accept" data-id="{{ shop.id }}">
+                                <i class="material-icons">check</i>
+                            </a>
+                            <a href="reject_shop" class="btn btn-danger btn-sm reject" data-id="{{ shop.id }}">
+                                <i class="material-icons">close</i> 
+                            </a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="10">No shop details available.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            const csrftoken = getCookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+
+            function handleAcceptClick(shopId) {
+                $.ajax({
+                    url: '{% url "accept_shop" %}',
+                    type: 'POST',
+                    data: {
+                        'request_id': shopId,
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#status-' + shopId).text('Confirmed');
+                        } else {
+                            alert('Failed to accept the request.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            }
+
+            function handleRejectClick(shopId) {
+                $.ajax({
+                    url: '{% url "reject_shop" %}',
+                    type: 'POST',
+                    data: {
+                        'request_id': shopId,
+                    },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#row-' + shopId).remove();
+                        } else {
+                            alert('Failed to reject the request.');
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            }
+
+            // Attach event handlers
+            $('a.accept').click(function(event) {
+                event.preventDefault();
+                const shopId = $(this).data('id');
+                handleAcceptClick(shopId);
+            });
+
+            $('a.reject').click(function(event) {
+                event.preventDefault();
+                const shopId = $(this).data('id');
+                handleRejectClick(shopId);
+            });
+        });
+    </script>
+    <footer>
+        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+    </footer>
+</body>
+</html>

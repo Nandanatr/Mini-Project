@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Vehicle Service Booking</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff9c4; /* Light yellow background */
+        }
+
+        #booking {
+            padding: 30px 0; /* Padding for booking section */
+            background-color: #ffffff; /* White background for booking section */
+        }
+
+        .section-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px; /* Adjusted maximum width */
+            margin: auto;
+            padding: 15px; /* Reduced padding */
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-form {
+            background: #ffffff;
+            padding: 20px; /* Padding for form */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            margin-bottom: 15px; /* Margin for form header */
+            text-align: center;
+        }
+
+        .form-header h1 {
+            font-size: 20px; /* Font size for header */
+            margin: 0;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px; /* Margin for form groups */
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px; /* Padding for form controls */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .submit-btn {
+            background-color: #ffeb3b; /* Bright yellow background */
+            color: #000; /* Black text color */
+            border: none;
+            padding: 12px; /* Padding for button */
+            border-radius: 4px;
+            font-size: 14px; /* Font size for button */
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #fdd835; /* Slightly darker yellow for hover effect */
+        }
+
+        .form-btn {
+            text-align: center;
+        }
+
+        /* Optional: Add additional styling for the table, if used */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0; /* Margin for table */
+        }
+
+        th, td {
+            padding: 10px; /* Padding for table cells */
+            text-align: left;
+            border: 1px solid #ddd; /* Light grey border */
+        }
+
+        th {
+            background-color: #ffeb3b; /* Bright yellow background for table headings */
+            color: #000; /* Black text color for headings */
+        }
+
+        td {
+            background-color: #fff; /* White background for data cells */
+            color: #333; /* Dark grey text color for data cells */
+        }
+
+        tr:nth-child(even) {
+            background-color: #fff9c4; /* Light yellow background for even rows */
+        }
+
+        tr:nth-child(odd) {
+            background-color: #f0f0f0; /* Very light grey background for odd rows */
+        }
+
+        /* Footer styling */
+        footer {
+            background-color: #000; /* Black footer background */
+            color: #fff; /* White text color */
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+  
+        <div class="container">
+            <div class="booking-form">
+                <div class="form-header">
+                    <h1>Vehicle Service Booking</h1>
+                </div>
+                <form method="POST" action="bookserv">
+                    {% csrf_token %}
+                    {% for i in data %}
+                    <div class="form-group">
+                        <label for="name" class="form-label">Name</label>
+                        <input id="name" class="form-control" value="{{i.name}}" type="text" name="name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email</label>
+                        <input id="email" class="form-control" value="{{i.mail}}" type="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input id="phone" class="form-control" value="{{i.phone}}" type="tel" name="phone" placeholder="Enter your phone number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="shop" class="form-label">Shop</label>
+                        <select id="shop" class="form-control" name="shop" required>
+                            <option value="">Select Shop</option>
+                            {% for k in shop %}
+                            <option value="{{ k.shopname }}">{{ k.shopname }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle" class="form-label">Vehicle Type</label>
+                        <select id="vehicle" class="form-control" name="vehicle" required>
+                            <option value="">Select vehicle type</option>
+                            <option value="car">Car</option>
+                            <option value="motorcycle">Motorcycle</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="service" class="form-label">Service Required</label>
+                        <select id="service" class="form-control" name="service" required>
+                            <option value="">Select service type</option>
+                            <option value="engine_check">Engine Check</option>
+                            <option value="oil_change">Oil Change</option>
+                            <option value="tire_replacement">Tire Replacement</option>
+                            <option value="general_service">General Service</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="date" class="form-label">Preferred Date</label>
+                        <input id="date" class="form-control" type="date" name="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="time" class="form-label">Preferred Time</label>
+                        <input id="time" class="form-control" type="time" name="time" required>
+                    </div>
+                    <div class="form-btn">
+                        <button class="submit-btn" type="submit">Book Now</button>
+                    </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</body>
+
+</html>

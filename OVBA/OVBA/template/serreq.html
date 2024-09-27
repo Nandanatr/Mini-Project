@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Service List</title>
+ <style>
+    /* Reset and base styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff9c4; /* Light yellow background */
+}
+
+.container {
+    width: 90%;
+   /* Adjusted max-width */
+    margin: auto;
+    padding: 15px; /* Reduced padding */
+    background-color: #ffffff; /* White background for the container */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0; /* Margin for spacing */
+}
+
+th, td {
+    padding: 10px; /* Reduced padding */
+    text-align: left;
+    border: 1px solid #000; /* Black border */
+}
+
+th {
+    background-color: #ffeb3b; /* Bright yellow background for headings */
+    color: #000; /* Black text color for headings */
+}
+
+td {
+    background-color: #fff; /* White background for data cells */
+    color: #333; /* Dark grey text color for data cells */
+}
+
+tr:nth-child(even) {
+    background-color: #fff9c4; /* Light yellow background for even rows */
+}
+
+tr:nth-child(odd) {
+    background-color: #f0f0f0; /* Very light grey background for odd rows */
+}
+
+footer {
+    background-color: #000; /* Black footer background */
+    color: #fff; /* White text color */
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+ </style>
+</head>
+
+<body>
+    <div id="booking" class="section">
+        <div class="section-center">
+            <div class="container">
+                <h1>Service List</h1>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Shop</th>
+                            <th>Vehicle</th>
+                            <th>Service Type</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Cash</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service in services %}
+                        <tr>
+
+                            <td>{{ service.user.name }}</td> <!-- Adjust this if needed -->
+                            <td>{{ service.email }}</td>
+                            <td>{{ service.phone }}</td>
+                            <td>{{ service.shop }}</td>
+                            <td>{{ service.vehicle }}</td>
+                            <td>{{ service.serv_type }}</td>
+                            <td>{{ service.date }}</td>
+                            <td>{{ service.time }}</td>
+                            <td>{{ service.status }}</td>
+                            <td>{{ service.cash }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10">No services available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+    </footer>
+</body>
+</html>

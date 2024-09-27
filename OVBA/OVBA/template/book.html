@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Mechanic</title>
+    <style>
+        #map {
+            height: 400px;  /* Set the height of the map */
+            width: 100%;    /* Set the width of the map */
+        }
+    </style>
+</head>
+<body>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <h1>Book a Mechanic</h1>
+    <form method="post" action="{% url 'book_mechanic' %}">
+        {% csrf_token %}
+        <label for="vehicle_type">Vehicle Type:</label>
+        <select id="vehicle_type" name="vehicle_type">
+            <option value="Car">Car</option>
+            <option value="Bike">Bike</option>
+            <option value="Truck">Truck</option>
+        </select><br>
+        <label for="issue">Issue:</label>
+        <select name="issue" id="spec" class="formbold-form-input" required>
+            <option value="">Select an option</option>
+            <option value="engine_type">Engine Type</option>
+            <option value="starting_trouble">Starting Trouble</option>
+            <option value="puncture_issue">Puncture Issue</option>
+            <option value="others">Others</option>
+        </select><br>
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" readonly><br>
+        <div id="map"></div><br>
+        <input type="submit" value="Book">
+    </form>
+
+    <script>
+        // Initialize the map
+        var map = L.map('map').setView([10.8505, 76.2711], 10);  // Center map on Kerala
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Add a draggable marker at the default location
+        var marker = L.marker([10.8505, 76.2711], { draggable: true }).addTo(map);
+
+        // Update the location input field when the marker is dragged
+        marker.on('dragend', function(event) {
+            var latLng = event.target.getLatLng();
+            document.getElementById('location').value = latLng.lat + ',' + latLng.lng;
+        });
+    </script>
+</body>
+</html>
