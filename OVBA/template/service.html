@@ -135,6 +135,19 @@
             position: fixed;
             bottom: 0;
             width: 100%;
+
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .checkbox-item {
+            width: 50%; /* Two items per row */
+            box-sizing: border-box; /* Ensure padding/margins don't affect width */
+        }
+        .checkbox-item label {
+            margin-left: 0.5rem; /* Optional: space between checkbox and label */
         }
     </style>
 </head>
@@ -179,15 +192,29 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="service" class="form-label">Service Required</label>
-                        <select id="service" class="form-control" name="service" required>
-                            <option value="">Select service type</option>
-                            <option value="engine_check">Engine Check</option>
-                            <option value="oil_change">Oil Change</option>
-                            <option value="tire_replacement">Tire Replacement</option>
-                            <option value="general_service">General Service</option>
-                            <option value="other">Other</option>
-                        </select>
+                        <label class="form-label">Services Required</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="engine_check" name="service" value="engine_check">
+                                <label for="engine_check">Engine Check</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="oil_change" name="service" value="oil_change">
+                                <label for="oil_change">Oil Change</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="tire_replacement" name="service" value="tire_replacement">
+                                <label for="tire_replacement">Tire Replacement</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="general_service" name="service" value="general_service">
+                                <label for="general_service">General Service</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="other" name="service" value="other">
+                                <label for="other">Other</label>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="date" class="form-label">Preferred Date</label>
@@ -202,6 +229,7 @@
                     </div>
                     {% endfor %}
                 </form>
+                
             </div>
         </div>
     </div>
