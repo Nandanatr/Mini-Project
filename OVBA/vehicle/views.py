@@ -21,6 +21,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 import os
 from django.http import HttpResponse, Http404
+import razorpay
 
 def first(request):
     return render(request , 'guesthome.html')
@@ -629,23 +630,24 @@ def book_service(request):
         phone = request.POST.get('phone')
         sh = request.POST.get('shop')
         vehicle = request.POST.get('vehicle')
-        service_type = request.POST.get('service')
+        service_types = request.POST.getlist('service[]')
+        other_service = request.POST.get('other_service', '').strip()
         Date = request.POST.get('date')
         Time = request.POST.get('time')
-        print(Date)
-        print(Time)
-          # Assuming cash is part of the form now
         
+        if 'other' in service_types and other_service:
+                service_types.append(other_service)
+   
+        print(name , email , phone , vehicle , service_types , Date , Time)
+
         # Validate the data
-        if not (name and email and phone and vehicle and service_type and Date and Time):
+        if not (name and email and phone and vehicle and service_types and Date and Time):
             return HttpResponse('All fields are required.', status=400)
 
         # Validate phone number
         if not phone.isdigit() or len(phone) < 10:
             return HttpResponse('Invalid phone number.', status=400)
-        
-        # Validate cash (if applicable)
-        
+
         try:
             # Fetch user from Register model
             user = register.objects.get(name=name)  # or use another identifier like username
@@ -657,7 +659,7 @@ def book_service(request):
                 phone=phone,
                 shop=sh,
                 vehicle=vehicle,
-                serv_type =service_type,
+                serv_type=', '.join(service_types),  # Store service types as a comma-separated string
                 date=Date,
                 time=Time,
                 status='Pending',  # Default status
@@ -668,13 +670,13 @@ def book_service(request):
             # Send confirmation email
             send_mail(
                 subject='Service Booking Confirmation',
-                message=f'Thank you for booking our service.\n\nDetails:\nName: {name}\nEmail: {email}\nPhone: {phone}\nVehicle: {vehicle}\nService: {service_type}\nDate: {Date}\nTime: {Time}\nStatus: Pending\nwe will inform further updates',
+                message=f'Thank you for booking our service.\n\nDetails:\nName: {name}\nEmail: {email}\nPhone: {phone}\nVehicle: {vehicle}\nServices: {", ".join(service_types)}\nDate: {Date}\nTime: {Time}\nStatus: Pending\nWe will inform further updates.',
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[email],  # Send confirmation to the user
                 fail_silently=False,
             )
 
-            return render(request,'index.html') 
+            return render(request, 'index.html') 
         except register.DoesNotExist:
             return HttpResponse('User not found.', status=404)
 
@@ -682,6 +684,7 @@ def book_service(request):
             return HttpResponse(f'Error processing request: {e}', status=500)
 
     return HttpResponse('Invalid request method.', status=405)
+
 def service_list(request):
     if 'uid' in request.session:
         user_id = request.session['uid']
@@ -754,3 +757,41 @@ def workpro(request):
         data = worker.objects.filter(username=name)
         return render(request,'woprofile.html',{'data':data})
     return render(request,'login.html')
+
+def payment(request):
+    if request.method in ['POST', 'GET']:
+        payment_id = request.GET.get('payment_id')  # Assuming you're using GET to capture payment_id
+        username = request.session.get('sid')  # Retrieve username from session
+        
+        if username:
+            # Find the corresponding service based on your logic
+            # Assuming you pass the service ID when redirecting to the payment page
+            service_id = request.GET.get('service_id')  # Capture the service ID
+            services = service.objects.get(id=service_id)  # Fetch the service
+            
+            amount = service.cash * 100  # Convert to paisa, as Razorpay requires amount in the smallest unit
+            
+            # Initialize Razorpay client
+            client = razorpay.Client(auth=("rzp_test_25QMSu2wWe3zbI", "oczP6DqWLp1biAN7GHWQjE4d"))
+            try:
+                # Create an order in Razorpay
+                payment = client.order.create({
+                    'amount': amount,
+                    'currency': 'INR',
+                    'payment_capture': '1'
+                })
+                order_id = payment['id']
+
+                # Save payment details to your database
+               
+
+                # Redirect to success page or render payment confirmation
+                return render(request, "index.html", {'payment_id': payment['id']})
+
+            except Exception as e:
+                return HttpResponse(f"Error occurred: {str(e)}")
+                
+        else:
+            return HttpResponse('<script>alert("You need to login first"); window.location.href = "/";</script>')
+
+    return HttpResponse('<script>alert("Invalid request method."); window.location.href = "/";</script>')

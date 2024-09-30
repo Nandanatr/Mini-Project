@@ -63,6 +63,7 @@ urlpatterns = [
     path('home',views.mind),
     path('dcer',views.cerdown),
     path('wrprf',views.workpro),
+    path('success',views.payment),
     
     
     

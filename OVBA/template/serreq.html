@@ -65,7 +65,19 @@ footer {
     bottom: 0;
     width: 100%;
 }
+.pay-button {
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-align: center;
+}
 
+.pay-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
  </style>
 </head>
 
@@ -87,13 +99,13 @@ footer {
                             <th>Time</th>
                             <th>Status</th>
                             <th>Cash</th>
+                            <th>Pay</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for service in services %}
                         <tr>
-
-                            <td>{{ service.user.name }}</td> <!-- Adjust this if needed -->
+                            <td>{{ service.user.name }}</td>
                             <td>{{ service.email }}</td>
                             <td>{{ service.phone }}</td>
                             <td>{{ service.shop }}</td>
@@ -103,6 +115,13 @@ footer {
                             <td>{{ service.time }}</td>
                             <td>{{ service.status }}</td>
                             <td>{{ service.cash }}</td>
+                            <td>
+                                {% if service.status == 'completed' %}
+                                <button class="pay-button" data-amount="{{ service.cash|floatformat:0 }}">Pay with Razorpay</button>
+                                {% else %}
+                                <p>Not completed</p>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -110,6 +129,38 @@ footer {
                         </tr>
                         {% endfor %}
                     </tbody>
+                    
+                    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                <script>
+                    // Add a click event listener to all pay buttons
+                    document.querySelectorAll('.pay-button').forEach(button => {
+                        button.onclick = function (e) {
+                            var amount = this.getAttribute('data-amount') * 100; // Convert to paisa
+                            var options = {
+                                "key": "rzp_test_25QMSu2wWe3zbI",
+                                "amount": amount, // Amount in paisa
+                                "currency": "INR",
+                                "name": "RepairHub",
+                                "description": "This is a test payment",
+                                "image": "https://example.com/your_logo.jpg",
+                                "prefill": {
+                                    "name": "Gaurav Kumar",
+                                    "email": "django@test.com"
+                                },
+                                "theme": {
+                                    "color": "#0000FF"
+                                },
+                                "handler": function (response) {
+                                    window.location.href = "success?payment_id=" + response.razorpay_payment_id;
+                                }
+                            };
+                            var rzp1 = new Razorpay(options);
+                            rzp1.open();
+                            e.preventDefault();
+                        };
+                    });
+                </script>
+
                 </table>
             </div>
         </div>

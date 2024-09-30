@@ -195,25 +195,29 @@
                         <label class="form-label">Services Required</label>
                         <div class="checkbox-group">
                             <div class="checkbox-item">
-                                <input type="checkbox" id="engine_check" name="service" value="engine_check">
+                                <input type="checkbox" id="engine_check" name="service[]" value="engine_check">
                                 <label for="engine_check">Engine Check</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" id="oil_change" name="service" value="oil_change">
+                                <input type="checkbox" id="oil_change" name="service[]" value="oil_change">
                                 <label for="oil_change">Oil Change</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" id="tire_replacement" name="service" value="tire_replacement">
+                                <input type="checkbox" id="tire_replacement" name="service[]" value="tire_replacement">
                                 <label for="tire_replacement">Tire Replacement</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" id="general_service" name="service" value="general_service">
+                                <input type="checkbox" id="general_service" name="service[]" value="general_service">
                                 <label for="general_service">General Service</label>
                             </div>
                             <div class="checkbox-item">
-                                <input type="checkbox" id="other" name="service" value="other">
+                                <input type="checkbox" id="other" name="service[]" value="other" onclick="toggleOtherInput()">
                                 <label for="other">Other</label>
                             </div>
+                        </div>
+                        <div class="form-group" id="other_service_input" style="display: none;">
+                            <label for="other_service" class="form-label">Please specify:</label>
+                            <input type="text" id="other_service" name="other_service" class="form-control" placeholder="Enter your service">
                         </div>
                     </div>
                     <div class="form-group">
@@ -230,8 +234,22 @@
                     {% endfor %}
                 </form>
                 
+                
             </div>
         </div>
+        <script>
+            function toggleOtherInput() {
+                const otherCheckbox = document.getElementById('other');
+                const otherServiceInput = document.getElementById('other_service_input');
+                
+                if (otherCheckbox.checked) {
+                    otherServiceInput.style.display = 'block';
+                } else {
+                    otherServiceInput.style.display = 'none';
+                }
+            }
+        </script>
+        
     </div>
     
 </body>
