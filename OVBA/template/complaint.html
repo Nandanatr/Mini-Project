@@ -58,6 +58,7 @@
         .form-group textarea {
             resize: vertical;
             min-height: 100px;
+            
         }
         .form-group input[type="submit"] {
             background: #007bff;
@@ -105,7 +106,7 @@
 <body>
     <div class="complaint-form">
         <h2>Complaint Form</h2>
-        <form action="comp" method="POST">
+        <form action="complaint" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="name">Name</label>
@@ -115,8 +116,8 @@
                 <label for="user">Name of Seller</label>
                 <select id="user" name="user" required>
                     <option value="">Select a seller</option>
-                    {% for user in users %}
-                        <option value="{{ user.id }}">{{ user.Name }}</option>
+                    {% for name in shop %}
+                        <option value="{{ name.id }}">{{ name.shopname }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -133,6 +134,7 @@
                     <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">★</label>
                     <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">★</label>
                     <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 star">★</label>
+
                 </div>
             </div>
             <div class="form-group">

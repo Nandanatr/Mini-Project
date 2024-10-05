@@ -82,7 +82,7 @@ class Certificate(models.Model):
     
     
 class complaint(models.Model):
-    user = models.ForeignKey(register, on_delete=models.CASCADE)
+    user = models.CharField(max_length=20)
     rating = models.CharField(max_length=10)
     mechanic = models.CharField(max_length=20)
     issue = models.CharField(max_length=20)

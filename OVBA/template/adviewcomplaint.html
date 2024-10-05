@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaints</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff9c4; /* Light yellow background */
+        }
+        
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #000; /* Black border */
+        }
+        
+        th {
+            background-color: #ffeb3b; /* Bright yellow background for headings */
+            color: #000; /* Black text color for headings */
+        }
+        
+        td {
+            background-color: #fff; /* White background for data cells */
+            color: #333; /* Dark grey text color for data cells */
+        }
+        
+        tr:nth-child(even) {
+            background-color: #fff9c4; /* Light yellow background for even rows */
+        }
+        
+        tr:nth-child(odd) {
+            background-color: #f0f0f0; /* Very light grey background for odd rows */
+        }
+        
+        .button {
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+        
+        .warning-button {
+            background-color: #ffcc00; /* Yellow for warning */
+        }
+        
+        .delete-button {
+            background-color: #ff4d4d; /* Red for delete */
+        }
+
+        footer {
+            background-color: #000; /* Black footer background */
+            color: #fff; /* White text color */
+            text-align: center;
+            padding: 10px 0;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="javascript:history.back()" class="btn btn-primary back-button">
+        <i class="material-icons"></i> Back
+    </a>
+    <h1>Complaint Details</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Shop Name</th>
+                <th>License Number</th>
+                <th>Phone Number</th>
+                <th>Place</th>
+                <th>State</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Review Count</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in shops_with_bad_reviews %}
+            <tr>
+                <td>{{ item.shop.username }}</td>
+                <td>{{ item.shop.shopname }}</td>
+                <td>{{ item.shop.lnumber }}</td>
+                <td>{{ item.phone_number }}</td>
+                <td>{{ item.shop.place }}</td>
+                <td>{{ item.shop.istate }}</td>
+                <td>{{ item.shop.idate }}</td>
+                <td>{{ item.shop.edate }}</td>
+                <td>{{ item.bad_review_count }}</td>
+                <td>
+                    <button class="button warning-button" onclick="showWarning('{{ item.shop.id }}', '{{ item.phone_number }}')">Warning</button>
+                    <button class="button delete-button" onclick="deleteShop('{{ item.shop.id }}')">Delete</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9">No shop details available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<footer>
+    <p>&copy; 2024 Your Company Name. All rights reserved.</p>
+</footer>
+
+<script>
+    function showWarning(shopId, phoneNumber) {
+        if (confirm(`Send a warning SMS to ${phoneNumber}?`)) {
+            fetch('/send-warning-sms/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',  
+                },
+                body: JSON.stringify({ 
+                    shop_id: shopId,
+                    phone_number: phoneNumber 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while sending the SMS.');
+            });
+        }
+    }
+</script>
+
+</body>
+</html>

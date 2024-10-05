@@ -66,6 +66,11 @@ urlpatterns = [
     path('success',views.payment),
     path('sersu',views.sersuc),
     path('comp',views.complaintopen),
+    path('complaint',views.submit_complaint),
+    path('adcomp',views.openadvcomp),
+    path('send-warning-sms/', views.send_warning_sms, name='send_warning_sms'),
+    
+    
     
     
     

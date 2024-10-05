@@ -23,6 +23,10 @@ import os
 from django.http import HttpResponse, Http404
 import razorpay
 from collections import Counter
+from twilio.rest import Client
+import json
+
+
 
 def first(request):
     return render(request , 'guesthome.html')
@@ -816,4 +820,94 @@ def sersuc(request):
     return render(request,'index.html')
 
 def complaintopen(request):
-    return render(request,'complaint.html')
+    shop = shopdetails.objects.all()
+    return render(request,'complaint.html',{'shop':shop})
+
+def submit_complaint(request):
+    if request.method == 'POST':
+        try:
+            name = request.POST.get('name')
+            user_id = request.POST.get('user')
+            rating = int(request.POST.get('rating'))
+            complaint_desc = request.POST.get('complaint')
+            compname = get_object_or_404(shopdetails, id=user_id)
+            print('name',name,'userid',user_id,'rateing',rating,'copna',complaint_desc,'conam',compname)
+
+            if 'uid' not in request.session:
+                return JsonResponse({'error': 'User not logged in'}, status=401)
+
+            user = request.session['uid']
+            rating_category = 'good' if rating >= 7 else 'average' if rating >= 5 else 'bad'
+
+            complaint_obj = complaint.objects.create(
+                user=user,
+                rating=rating_category,
+                mechanic=compname,
+                issue=complaint_desc
+            )
+
+            return JsonResponse({'message': 'Complaint submitted successfully!'})
+        
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+def openadvcomp(request):
+    shops_with_bad_reviews = []
+
+    shops = shopdetails.objects.all()
+    
+    for shop in shops:
+      
+        bad_review_count = complaint.objects.filter(mechanic=shop.shopname, rating='bad').count()
+        
+ 
+        phone_number = shop.username.phone
+       
+        
+      
+        shops_with_bad_reviews.append({
+            'shop': shop,
+            'bad_review_count': bad_review_count,
+            'phone_number': phone_number,
+        })
+    
+    return render(request, 'adviewcomplaint.html', {'shops_with_bad_reviews': shops_with_bad_reviews})
+
+
+
+def send_warning_sms(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)  # Load JSON data from the request
+        shop_id = data.get('shop_id')
+        phone_number = data.get('phone_number')
+        phone_number = '+91' + phone_number
+        print(phone_number)
+
+        try:
+            # Fetch the shop details using the provided shop_id
+            shop = shopdetails.objects.get(id=shop_id)
+        except shopdetails.DoesNotExist:
+            return JsonResponse({'error': 'Shop not found'}, status=404)
+
+        # Construct the message
+        message_body = f"Warning: The shop {shop.shopname} has received a bad review! If this continue we will terminate your account\n From RepairHub 🥰"
+        TWILIO_ACCOUNT_SID = 'ACf01e3a7d0721444522effabf8b8fa51a'
+        TWILIO_AUTH_TOKEN = '08c30b94161e2eb53a9bc16f320a8566'
+        TWILIO_PHONE_NUMBER = '+15738792764'
+
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+
+    
+        try:
+            message = client.messages.create(
+                body=message_body,
+                from_=TWILIO_PHONE_NUMBER,
+                to=phone_number
+            )
+            return JsonResponse({'message': 'SMS sent successfully!'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=400)
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
