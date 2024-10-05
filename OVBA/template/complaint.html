@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complaint Form with Star Rating</title>
+    <style>
+        #name {
+            width: 92%;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #fff9c4; /* Change to light yellow background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .complaint-form {
+            background: #fff;
+            margin-bottom: 10%;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .complaint-form h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-group select {
+            appearance: none;
+            background-color: #fff;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="#000" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        .form-group input[type="submit"] {
+            background: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .form-group input[type="submit"]:hover {
+            background: #0056b3;
+        }
+        .rating {
+            display: flex;
+            direction: row-reverse;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .rating input {
+            display: none;
+        }
+        .rating label {
+            font-size: 30px;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .rating input:checked ~ label,
+        .rating label:hover,
+        .rating label:hover ~ label {
+            color: #ffcc00;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark overlay for footer */
+            color: #ffffff; /* White text */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 14px;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="complaint-form">
+        <h2>Complaint Form</h2>
+        <form action="comp" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" placeholder="Enter your name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="user">Name of Seller</label>
+                <select id="user" name="user" required>
+                    <option value="">Select a seller</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user.Name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="rating">Rating</label>
+                <div class="rating">
+                    <input type="radio" id="star10" name="rating" value="10"><label for="star10" title="10 stars">★</label>
+                    <input type="radio" id="star9" name="rating" value="9"><label for="star9" title="9 stars">★</label>
+                    <input type="radio" id="star8" name="rating" value="8"><label for="star8" title="8 stars">★</label>
+                    <input type="radio" id="star7" name="rating" value="7"><label for="star7" title="7 stars">★</label>
+                    <input type="radio" id="star6" name="rating" value="6"><label for="star6" title="6 stars">★</label>
+                    <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 stars">★</label>
+                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars">★</label>
+                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">★</label>
+                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">★</label>
+                    <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 star">★</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="complaint">Complaint</label>
+                <textarea id="complaint" name="complaint" placeholder="Write your complaints here" required></textarea>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Submit">
+            </div>
+        </form>
+    </div>
+    <footer>
+        <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay=".3s">
+            <div class="container py-5">
+                <div class="row g-4 footer-inner">
+                    <div class="col-lg-6 col-md-6">
+                        <div class="footer-item">
+                            <h1 class="text-primary">Repair<span class="text-dark">Hub</span></h1>
+                            <p class="lh-lg mb-4">At RepairHub, we provide reliable vehicle repairs with skilled mechanics and affordable rates. Trust us for top-quality service and quick turnaround.</p>
+                            <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>RepairHub</a>, All right reserved.</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="footer-item">
+                            <h4 class="text-white fw-bold mb-4">Contact Us</h4>
+                            <a href="" class="btn btn-link w-100 text-start ps-0 pb-3 border-bottom rounded-0"><i class="fa fa-map-marker-alt me-3"></i>Kottayam</a>
+                            <a href="" class="btn btn-link w-100 text-start ps-0 py-3 border-bottom rounded-0"><i class="fa fa-phone-alt me-3"></i>9061250620</a>
+                            <a href="" class="btn btn-link w-100 text-start ps-0 py-3 border-bottom rounded-0"><i class="fa fa-envelope me-3"></i>repairhub@gmail.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.querySelectorAll('.rating label').forEach(label => {
+            label.addEventListener('click', function() {
+                const rating = this.getAttribute('for').replace('star', '');
+                document.querySelectorAll('.rating label').forEach(lbl => {
+                    lbl.style.color = '#ccc';
+                });
+                for (let i = 1; i <= rating; i++) {
+                    document.querySelector(`label[for="star${i}"]`).style.color = '#ffcc00';
+                }
+            });
+        });
+
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const rating = document.querySelector('input[name="rating"]:checked').value;
+            const formData = new FormData(this);
+            formData.append('rating', rating);
+            fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            }).then(data => {
+                console.log('Success:', data);
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+    <script>
+        document.querySelector('form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const rating = document.querySelector('input[name="rating"]:checked').value;
+            const formData = new FormData(this);
+            formData.append('rating', rating);
+            fetch(this.action, {
+                method: this.method,
+                body: formData,
+                headers: {
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+            }).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Something went wrong');
+                }
+            }).then(data => {
+                // Show an alert box based on the response
+                if (data.message) {
+                    alert(data.message); // Complaint submitted successfully
+                } else {
+                    alert('Failed to submit complaint: ' + data.error); // Complaint submission failed
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the complaint');
+            });
+        });
+    </script>
+    
+</body>
+</html>

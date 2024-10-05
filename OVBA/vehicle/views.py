@@ -22,6 +22,7 @@ from django.conf import settings
 import os
 from django.http import HttpResponse, Http404
 import razorpay
+from collections import Counter
 
 def first(request):
     return render(request , 'guesthome.html')
@@ -131,13 +132,27 @@ def profile(request):
     elif 'aid' in request.session:
         data = request.session['aid']
         data3 = register.objects.filter(username=data)
+
         num_of_user = register.objects.filter(usertype='vehicleOwner').count()
         num_of_owner = register.objects.filter(usertype='mechanicOwner').count()
         num_of_worker = worker.objects.all().count()
         
-        return render(request, 'admin.html',{'nuser':num_of_user,'nowner':num_of_owner,'nwork':num_of_worker})
+        vehicle_owner_count = register.objects.filter(usertype='vehicleOwner').count()
+        mechanical_owner_count = register.objects.filter(usertype='mechanicOwner').count()
+        
+        shopreq = shopdetails.objects.all()
+
+        return render(request, 'admin.html', {
+            'nuser': num_of_user,
+            'nowner': num_of_owner,
+            'nwork': num_of_worker,
+            'vehicle_owner_count': vehicle_owner_count,
+            'mechanical_owner_count': mechanical_owner_count,
+            'shop':shopreq,
+        })
     else:
-            return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
+        return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
+
 def openforget(request):
     return render(request, 'forget.html', {'step': '1'})
 
@@ -758,40 +773,47 @@ def workpro(request):
         return render(request,'woprofile.html',{'data':data})
     return render(request,'login.html')
 
+
 def payment(request):
     if request.method in ['POST', 'GET']:
-        payment_id = request.GET.get('payment_id')  # Assuming you're using GET to capture payment_id
-        username = request.session.get('sid')  # Retrieve username from session
+        payment_id = request.GET.get('payment_id')  # Capture payment_id
+        username = request.session.get('uid')  # Retrieve username from session
         
         if username:
-            # Find the corresponding service based on your logic
-            # Assuming you pass the service ID when redirecting to the payment page
-            service_id = request.GET.get('service_id')  # Capture the service ID
-            services = service.objects.get(id=service_id)  # Fetch the service
-            
-            amount = service.cash * 100  # Convert to paisa, as Razorpay requires amount in the smallest unit
-            
-            # Initialize Razorpay client
-            client = razorpay.Client(auth=("rzp_test_25QMSu2wWe3zbI", "oczP6DqWLp1biAN7GHWQjE4d"))
+            # Capture the service ID
+            service_id = request.GET.get('service_id')
             try:
-                # Create an order in Razorpay
-                payment = client.order.create({
-                    'amount': amount,
+              
+                services = service.objects.get(id=service_id) 
+                
+
+                amount = services.cash * 100  
+  
+                client = razorpay.Client(auth=("rzp_test_25QMSu2wWe3zbI", "oczP6DqWLp1biAN7GHWQjE4d"))
+                
+                payment_order = client.order.create({
+                    'amount': amount,  
                     'currency': 'INR',
                     'payment_capture': '1'
                 })
-                order_id = payment['id']
+                services.delete()
+                order_id = payment_order['id']
+                
+                return render(request, "sersucc.html", {'payment_id': order_id})
 
-                # Save payment details to your database
-               
-
-                # Redirect to success page or render payment confirmation
-                return render(request, "index.html", {'payment_id': payment['id']})
-
+            except service.DoesNotExist:
+                return HttpResponse('<script>alert("Service not found."); window.location.href = "/";</script>')
             except Exception as e:
                 return HttpResponse(f"Error occurred: {str(e)}")
                 
         else:
-            return HttpResponse('<script>alert("You need to login first"); window.location.href = "/";</script>')
+            return HttpResponse('<script>alert("You need to login first."); window.location.href = "/";</script>')
 
     return HttpResponse('<script>alert("Invalid request method."); window.location.href = "/";</script>')
+
+
+def sersuc(request):
+    return render(request,'index.html')
+
+def complaintopen(request):
+    return render(request,'complaint.html')

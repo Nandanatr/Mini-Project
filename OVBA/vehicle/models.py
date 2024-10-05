@@ -79,3 +79,15 @@ class Certificate(models.Model):
     
     def __str__(self):
         return f"Certificate for {self.shop.shopname}"
+    
+    
+class complaint(models.Model):
+    user = models.ForeignKey(register, on_delete=models.CASCADE)
+    rating = models.CharField(max_length=10)
+    mechanic = models.CharField(max_length=20)
+    issue = models.CharField(max_length=20)
+    
+    
+    
+    def __str__(self):
+        return self.user  

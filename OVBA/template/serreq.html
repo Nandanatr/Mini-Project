@@ -86,6 +86,7 @@ footer {
         <div class="section-center">
             <div class="container">
                 <h1>Service List</h1>
+                <form action="succes" method="post">
                 <table>
                     <thead>
                         <tr>
@@ -117,11 +118,14 @@ footer {
                             <td>{{ service.cash }}</td>
                             <td>
                                 {% if service.status == 'completed' %}
-                                <button class="pay-button" data-amount="{{ service.cash|floatformat:0 }}">Pay with Razorpay</button>
+                                <button class="pay-button" data-amount="{{ service.cash|floatformat:0 }}" data-service-id="{{ service.id }}">
+                                    Pay with Razorpay
+                                </button>
                                 {% else %}
                                 <p>Not completed</p>
                                 {% endif %}
                             </td>
+                            
                         </tr>
                         {% empty %}
                         <tr>
@@ -132,13 +136,13 @@ footer {
                     
                     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
                 <script>
-                    // Add a click event listener to all pay buttons
                     document.querySelectorAll('.pay-button').forEach(button => {
                         button.onclick = function (e) {
-                            var amount = this.getAttribute('data-amount') * 100; // Convert to paisa
+                            var amount = this.getAttribute('data-amount') * 100; 
+                            var serviceId = this.getAttribute('data-service-id'); 
                             var options = {
                                 "key": "rzp_test_25QMSu2wWe3zbI",
-                                "amount": amount, // Amount in paisa
+                                "amount": amount,
                                 "currency": "INR",
                                 "name": "RepairHub",
                                 "description": "This is a test payment",
@@ -151,7 +155,8 @@ footer {
                                     "color": "#0000FF"
                                 },
                                 "handler": function (response) {
-                                    window.location.href = "success?payment_id=" + response.razorpay_payment_id;
+                                 
+                                    window.location.href = "success?payment_id=" + response.razorpay_payment_id + "&service_id=" + serviceId;
                                 }
                             };
                             var rzp1 = new Razorpay(options);
@@ -159,7 +164,9 @@ footer {
                             e.preventDefault();
                         };
                     });
+                    
                 </script>
+            </form>
 
                 </table>
             </div>

@@ -31,6 +31,8 @@
 
     <!-- Template Stylesheet -->
     <link href="{% static '1css/style.css' %}" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
@@ -222,37 +224,91 @@
             <!-- Sale & Revenue End -->
 
 
-            <!-- Sales Chart Start -->
             <div class="container-fluid pt-4 px-4">
                 <div class="row g-4">
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary text-center rounded p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <h6 class="mb-0">Total users</h6>
-                                <a href="">Show All</a>
+                                <h6 class="mb-0">Total Vehicle Owners</h6>
                             </div>
-                            <canvas ></canvas>
+                            <canvas id="vehicleOwnerChart"></canvas>
                         </div>
                     </div>
                     <div class="col-sm-12 col-xl-6">
                         <div class="bg-secondary text-center rounded p-4">
                             <div class="d-flex align-items-center justify-content-between mb-4">
-                                <h6 class="mb-0">Total users</h6>
-                                <a href="">Show All</a>
+                                <h6 class="mb-0">Total Mechanical Owners</h6>
                             </div>
-                            <canvas ></canvas>
+                            <canvas id="mechanicalOwnerChart"></canvas>
                         </div>
                     </div>
                 </div>
             </div>
+        
+            <script>
+                // Data for Vehicle Owners
+                const vehicleOwnerCount = {{ vehicle_owner_count }};
+                const vehicleLabels = ['Vehicle Owners'];
+                const vehicleData = [vehicleOwnerCount];
+            
+                const vehicleCtx = document.getElementById('vehicleOwnerChart').getContext('2d');
+                const vehicleChart = new Chart(vehicleCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: vehicleLabels,
+                        datasets: [{
+                            label: 'Number of Vehicle Owners',
+                            data: vehicleData,
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            
+                // Data for Mechanical Owners
+                const mechanicalOwnerCount = {{ mechanical_owner_count }};
+                const mechanicalLabels = ['Mechanical Owners'];
+                const mechanicalData = [mechanicalOwnerCount];
+            
+                const mechanicalCtx = document.getElementById('mechanicalOwnerChart').getContext('2d');
+                const mechanicalChart = new Chart(mechanicalCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: mechanicalLabels,
+                        datasets: [{
+                            label: 'Number of Mechanical Owners',
+                            data: mechanicalData,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            </script>
+            
             <!-- Sales Chart End -->
 
 
-            Recent Sales Start
+            Recent shop request
             <div class="container-fluid pt-4 px-4">
                 <div class="bg-secondary text-center rounded p-4">
                     <div class="d-flex align-items-center justify-content-between mb-4">
-                        <h6 class="mb-0">Recent Salse</h6>
+                        <h6 class="mb-0">Shop Details</h6>
                         <a href="">Show All</a>
                     </div>
                     <div class="table-responsive">
@@ -260,65 +316,42 @@
                             <thead>
                                 <tr class="text-white">
                                     <th scope="col"><input class="form-check-input" type="checkbox"></th>
-                                    <th scope="col">Date</th>
-                                    <th scope="col">Invoice</th>
-                                    <th scope="col">Customer</th>
-                                    <th scope="col">Amount</th>
+                                    <th scope="col">Shop Name</th>
+                                    <th scope="col">Owner</th>
+                                    <th scope="col">License Number</th>
+                                    <th scope="col">Place</th>
+                                    <th scope="col">State</th>
+                                    <th scope="col">Start Date</th>
+                                    <th scope="col">End Date</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for sale in shop %}
                                 <tr>
                                     <td><input class="form-check-input" type="checkbox"></td>
-                                    <td>01 Jan 2045</td>
-                                    <td>INV-0123</td>
-                                    <td>Jhon Doe</td>
-                                    <td>$123</td>
-                                    <td>Paid</td>
-                                    <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
+                                    <td>{{ sale.shopname }}</td> 
+                                    <td>{{ sale.username.username }}</td> 
+                                    <td>{{ sale.lnumber }}</td> 
+                                    <td>{{ sale.place }}</td> 
+                                    <td>{{ sale.istate }}</td> 
+                                    <td>{{ sale.idate }}</td>
+                                    <td>{{ sale.edate }}</td> 
+                                    <td>{{ sale.status }}</td> 
+                                    <td><a class="btn btn-sm btn-primary" href="adreq">Detail</a></td>
                                 </tr>
+                                {% empty %}
                                 <tr>
-                                    <td><input class="form-check-input" type="checkbox"></td>
-                                    <td>01 Jan 2045</td>
-                                    <td>INV-0123</td>
-                                    <td>Jhon Doe</td>
-                                    <td>$123</td>
-                                    <td>Paid</td>
-                                    <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
+                                    <td colspan="10" class="text-center">No shop details found.</td>
                                 </tr>
-                                <tr>
-                                    <td><input class="form-check-input" type="checkbox"></td>
-                                    <td>01 Jan 2045</td>
-                                    <td>INV-0123</td>
-                                    <td>Jhon Doe</td>
-                                    <td>$123</td>
-                                    <td>Paid</td>
-                                    <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td><input class="form-check-input" type="checkbox"></td>
-                                    <td>01 Jan 2045</td>
-                                    <td>INV-0123</td>
-                                    <td>Jhon Doe</td>
-                                    <td>$123</td>
-                                    <td>Paid</td>
-                                    <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
-                                <tr>
-                                    <td><input class="form-check-input" type="checkbox"></td>
-                                    <td>01 Jan 2045</td>
-                                    <td>INV-0123</td>
-                                    <td>Jhon Doe</td>
-                                    <td>$123</td>
-                                    <td>Paid</td>
-                                    <td><a class="btn btn-sm btn-primary" href="">Detail</a></td>
-                                </tr>
+                                {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
+            
             <!-- Recent Sales End -->
 
 
@@ -477,6 +510,7 @@
     <script src="{% static '1lib/tempusdominus/js/moment.min.js' %}"></script>
     <script src="{% static '1lib/tempusdominus/js/moment-timezone.min.js' %}"></script>
     <script src="{% static '1lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+    
 
     <!-- Template Javascript -->
     <script src="{% static '1js/main.js' %}"></script>

@@ -64,6 +64,9 @@ urlpatterns = [
     path('dcer',views.cerdown),
     path('wrprf',views.workpro),
     path('success',views.payment),
+    path('sersu',views.sersuc),
+    path('comp',views.complaintopen),
+    
     
     
     
