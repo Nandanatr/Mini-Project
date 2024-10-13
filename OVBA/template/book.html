@@ -25,10 +25,10 @@
         <label for="issue">Issue:</label>
         <select name="issue" id="spec" class="formbold-form-input" required>
             <option value="">Select an option</option>
-            <option value="engine_type">Engine Type</option>
-            <option value="starting_trouble">Starting Trouble</option>
-            <option value="puncture_issue">Puncture Issue</option>
-            <option value="others">Others</option>
+            <option value="Engine Type">Engine Type</option>
+            <option value="Starting Trouble">Starting Trouble</option>
+            <option value="Puncture Issue">Puncture Issue</option>
+            <option value="All">All</option>
         </select><br>
         <label for="location">Location:</label>
         <input type="text" id="location" name="location" readonly><br>
@@ -37,10 +37,10 @@
     </form>
 
     <script>
-        // Initialize the map
-        var map = L.map('map').setView([10.8505, 76.2711], 10);  // Center map on Kerala
+       
+        var map = L.map('map').setView([10.8505, 76.2711], 10);  
 
-        // Add OpenStreetMap tile layer
+      
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);

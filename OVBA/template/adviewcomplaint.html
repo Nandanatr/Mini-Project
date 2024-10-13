@@ -163,6 +163,31 @@
         }
     }
 </script>
-
+<script>
+    function deleteShop(shopId) {
+        if (confirm('Are you sure you want to delete this shop?')) {
+            fetch(`/shops/delete/${shopId}/`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}', // Add CSRF token for security
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Shop deleted successfully.');
+                    // Optionally remove the shop from the UI
+                    document.getElementById(`shop-${shopId}`).remove();
+                } else {
+                    alert('Failed to delete the shop.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+               
+            });
+        }
+    }
+    </script>
 </body>
 </html>

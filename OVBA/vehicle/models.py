@@ -42,32 +42,38 @@ class service(models.Model):
     
     
     
+class worker(models.Model):
+    user = models.ForeignKey(register, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=10)
+    mail = models.EmailField()
+    adhar = models.CharField(max_length=12)
+    special = models.CharField(max_length=100)
+    username = models.CharField(max_length=100)
+    password = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
+    district = models.CharField(max_length=100)
+    pin = models.CharField(max_length=6)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.name  
+    
+    
 class Booking(models.Model):
     user = models.ForeignKey(register, on_delete=models.CASCADE)
-    vehicle_type = models.CharField(max_length=100)
-    issue = models.CharField(max_length=20)
+    worker = models.CharField(max_length=20)
+    vehicle_type = models.CharField(max_length=50)
+    issue = models.CharField(max_length=100)
     latitude = models.FloatField()
     longitude = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True)
+
     
     def __str__(self):
         return f'Booking by {self.user.username} on {self.created_at.strftime("%Y-%m-%d %H:%M:%S")}'
     
-    
-    
-class worker(models.Model): 
-    user = models.ForeignKey(register,on_delete=models.CASCADE)
-    name = models.CharField(max_length=20)
-    phone = models.IntegerField()
-    mail = models.EmailField()
-    adhar = models.IntegerField()
-    special = models.CharField(max_length=20)
-    username  = models.CharField(max_length=20)
-    password = models.CharField(max_length=20)
-    state = models.CharField(max_length=20)
-    pin = models.IntegerField()
-    def __str__(self):
-        return self.name    
     
     
     

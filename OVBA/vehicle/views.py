@@ -25,6 +25,8 @@ import razorpay
 from collections import Counter
 from twilio.rest import Client
 import json
+import requests
+import math
 
 
 
@@ -145,6 +147,8 @@ def profile(request):
         mechanical_owner_count = register.objects.filter(usertype='mechanicOwner').count()
         
         shopreq = shopdetails.objects.all()
+        
+        comp = complaint.objects.all()
 
         return render(request, 'admin.html', {
             'nuser': num_of_user,
@@ -153,6 +157,7 @@ def profile(request):
             'vehicle_owner_count': vehicle_owner_count,
             'mechanical_owner_count': mechanical_owner_count,
             'shop':shopreq,
+            'complaints':comp
         })
     else:
         return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
@@ -295,6 +300,22 @@ def shoprequest(request):
 def book(request):
     return render(request,'book.html')
         
+# Haversine formula to calculate distance between two points (lat/lng)
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0  # Radius of the Earth in kilometers
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    return R * c  # Distance in kilometers
+
 
 def book_mechanic(request):
     if request.method == 'POST':
@@ -304,38 +325,103 @@ def book_mechanic(request):
             try:
                 user = register.objects.get(username=uname)
             except register.DoesNotExist:
-                return HttpResponse('User does not exist', status=400)
+                return JsonResponse({'error': 'User does not exist'}, status=400)
             
             vehicle_type = request.POST.get('vehicle_type')
             issue = request.POST.get('issue')
-            location = request.POST.get('location')  # Location as 'lat,lng'
+            location = request.POST.get('location')  # Expecting format 'lat,lng'
             
             if vehicle_type and issue and location:
                 try:
                     lati, longi = map(float, location.split(','))
                 except ValueError:
-                    return HttpResponse('Invalid location format', status=400)
+                    return JsonResponse({'error': 'Invalid location format'}, status=400)
+
+                # Find workers specializing in the user's issue
+                workers = worker.objects.filter(special=issue)
+                print('work',workers)
                 
-                # Create and save booking
-                booking = Booking(
-                    user=user,
-                    vehicle_type=vehicle_type,
-                    issue=issue,
-                    latitude=lati,
-                    longitude=longi
-                )
-                booking.save()
-                return render(request,'bookin_success.html')
+                # Calculate the distance to each worker
+                workers_with_distance = []
+                for worker_instance in workers:
+                    worker_latitude = worker_instance.latitude
+                    worker_longitude = worker_instance.longitude
+                    
+                    print('lat',worker_latitude)
+                    print('long',worker_longitude)
+                    
+                    # Calculate distance using Haversine formula
+                    distance = haversine(lati, longi, worker_latitude, worker_longitude)
+                    workers_with_distance.append((worker_instance, distance))
+
+                # Sort workers by distance (closest first)
+                workers_with_distance.sort(key=lambda x: x[1])
+
+                # Prepare worker data for frontend
+                worker_list = []  # Initialize an empty list to hold the worker details.
+
+                for work, distance in workers_with_distance:  # Iterate over each worker and their distance.
+                    worker_details = {  # Create a dictionary for each worker's details.
+                        'id': work.id,
+                        'name': work.name,
+                        'special': work.special,
+                        'distance': distance,
+                        'phone':work.phone,
+                        'mail':work.mail,
+                    }
+                    worker_list.append(worker_details)  # Append the dictionary to the worker_list.
+
+
+                context = {
+                    'workers': worker_list,
+                    'vehicle_type': vehicle_type,
+                    'issue': issue,
+                    'latitude': lati,  # Pass latitude separately
+                    'longitude': longi,  # Pass longitude separately
+                    'user_id': user.id,  # Include user ID if needed
+                }
+                
+                return render(request, 'select_worker.html', context)
             else:
-                return HttpResponse('Missing required data', status=400)
+                return JsonResponse({'error': 'Missing required data'}, status=400)
         else:
-            return HttpResponse('User not logged in', status=403)
-    
-    # Render the form for GET requests
+            return JsonResponse({'error': 'User not logged in'}, status=403)
+
     return render(request, 'book_mechanic.html')
 
+def finalize_booking(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        worker_id = request.POST.get('worker')
+        vehicle_type = request.POST.get('vehicle_type')
+        issue = request.POST.get('issue')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
 
+        if user_id and worker_id and vehicle_type and issue and latitude and longitude:
+            try:
+                latitude = float(latitude)
+                longitude = float(longitude)
+            except ValueError:
+                return JsonResponse({'error': 'Invalid location values'}, status=400)
 
+            user = get_object_or_404(register, id=user_id)
+            worker_instance = get_object_or_404(worker, id=worker_id)  # Retrieve the Worker instance
+
+            # Create and save the booking
+            booking = Booking(
+                user=user,
+                worker=worker_instance,  # Use the actual Worker instance
+                vehicle_type=vehicle_type,
+                issue=issue,
+                latitude=latitude,
+                longitude=longitude,
+            )
+            booking.save()
+
+            return JsonResponse({'success': True, 'message': 'Booking confirmed!'})
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 def openrequest(request):
     
     data = shopdetails.objects.all()
@@ -453,6 +539,18 @@ def add_workeropen(request):
         return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
     
 
+def geocode_location(location_name):
+    url = f'https://nominatim.openstreetmap.org/search?q={location_name}&format=json'
+    response = requests.get(url)
+    location_data = response.json()
+
+    if location_data:
+        latitude = location_data[0]['lat']
+        longitude = location_data[0]['lon']
+        return float(latitude), float(longitude)
+    else:
+        return None, None  # Handle case when location isn't found
+
 def addworker(request):
     if request.method == 'POST':
         if 'mid' in request.session:
@@ -463,7 +561,6 @@ def addworker(request):
             except register.DoesNotExist:
                 return HttpResponse('<script>alert("Invalid user."); window.history.back();</script>')
 
- 
             name = request.POST.get('name')
             phone = request.POST.get('phone')
             mail = request.POST.get('email')
@@ -472,15 +569,22 @@ def addworker(request):
             uname = request.POST.get('username')
             wpass = request.POST.get('pass')
             state = request.POST.get('state')
+            district = request.POST.get('district')  # Capture district
             pin = request.POST.get('pin')
+
             if len(adhar) != 12 or not re.match(r'^\d{12}$', adhar):
-                 return HttpResponse(f'<script>alert("Enter valid adhar number"); window.history.back();</script>')
+                return HttpResponse('<script>alert("Enter valid Aadhar number."); window.history.back();</script>')
              
             if len(phone) != 10 or not re.match(r'^\d{10}$', phone):
-                 return HttpResponse(f'<script>alert("Enter valid phone number"); window.history.back();</script>')
+                return HttpResponse('<script>alert("Enter valid phone number."); window.history.back();</script>')
+
+            # Geocode the district to get latitude and longitude
+            latitude, longitude = geocode_location(district)
+            if latitude is None or longitude is None:
+                return HttpResponse('<script>alert("Invalid location. Please try again."); window.history.back();</script>')
 
             try:
-                
+                # Save worker with latitude and longitude
                 workers = worker.objects.create(
                     user=user,
                     name=name,
@@ -491,12 +595,14 @@ def addworker(request):
                     username=uname,
                     password=wpass,
                     state=state,
-                    pin=pin
+                    district=district,
+                    pin=pin,
+                    latitude=latitude,  # Store latitude
+                    longitude=longitude  # Store longitude
                 )
                 workers.save()
-                
-               
-                return render(request,'worksucc.html' ,{'data':workers}) 
+
+                return render(request, 'worksucc.html', {'data': workers})
             except Exception as e:
                 return HttpResponse(f'<script>alert("An error occurred: {e}"); window.history.back();</script>')
 
@@ -738,7 +844,7 @@ def update_service(request, id):
         services.cash = cash
         services.save()
 
-        return render(request,'serupsucc.html')  # Redirect to the detail page or another page after update
+        return render(request,'serupsucc.html') 
 
     return render(request, 'update_service.html', {'service': service})
 def mind(request):
@@ -750,12 +856,12 @@ def cerdown(request,):
         shopname = shopdetails.objects.get(username=user)
 
         try:
-            # Fetch the certificate for the given id and ensure it belongs to the user's shop
+          
             certificate = Certificate.objects.get( shop=shopname)
         except Certificate.DoesNotExist:
             raise Http404("Certificate not found")
 
-        # Serve the certificate file
+      
         if certificate.file:
             file_path = certificate.file.path
             if os.path.exists(file_path):
@@ -780,8 +886,8 @@ def workpro(request):
 
 def payment(request):
     if request.method in ['POST', 'GET']:
-        payment_id = request.GET.get('payment_id')  # Capture payment_id
-        username = request.session.get('uid')  # Retrieve username from session
+        payment_id = request.GET.get('payment_id')
+        username = request.session.get('uid') 
         
         if username:
             # Capture the service ID
@@ -879,22 +985,22 @@ def openadvcomp(request):
 
 def send_warning_sms(request):
     if request.method == 'POST':
-        data = json.loads(request.body)  # Load JSON data from the request
+        data = json.loads(request.body) 
         shop_id = data.get('shop_id')
         phone_number = data.get('phone_number')
         phone_number = '+91' + phone_number
         print(phone_number)
 
         try:
-            # Fetch the shop details using the provided shop_id
+          
             shop = shopdetails.objects.get(id=shop_id)
         except shopdetails.DoesNotExist:
             return JsonResponse({'error': 'Shop not found'}, status=404)
 
-        # Construct the message
+  
         message_body = f"Warning: The shop {shop.shopname} has received a bad review! If this continue we will terminate your account\n From RepairHub 🥰"
         TWILIO_ACCOUNT_SID = 'ACf01e3a7d0721444522effabf8b8fa51a'
-        TWILIO_AUTH_TOKEN = '08c30b94161e2eb53a9bc16f320a8566'
+        TWILIO_AUTH_TOKEN = '321eff82b17787b15aae04ceaadd4081'
         TWILIO_PHONE_NUMBER = '+15738792764'
 
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -911,3 +1017,12 @@ def send_warning_sms(request):
             return JsonResponse({'error': str(e)}, status=400)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+def delete_shop(request, shop_id):
+    try:
+        shop = shopdetails.objects.get(id=shop_id)
+        shop.delete()
+        return JsonResponse({'message': 'Shop deleted successfully.'}, status=200)
+    except shopdetails.DoesNotExist:
+        return JsonResponse({'error': 'Shop not found.'}, status=404)

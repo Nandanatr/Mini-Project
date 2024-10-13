@@ -32,7 +32,7 @@ EMAIL_PORT = 587  # Typically 587 for TLS, 465 for SSL, 25 for non-secure
 EMAIL_USE_TLS = True  # Use True if using TLS
 EMAIL_USE_SSL = False  # Use True if using SSL, ensure to disable TLS if using SSL
 EMAIL_HOST_USER = 'RepairHub003@gmail.com'
-EMAIL_HOST_PASSWORD = 'wmwt wpuc udth sdfg'
+EMAIL_HOST_PASSWORD = 'qpjp phuj iobe jqat'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 

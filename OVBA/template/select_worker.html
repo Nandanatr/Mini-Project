@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Mechanic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #363369, #00c6ff);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-content {
+            padding: 16px;
+        }
+
+        .worker-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            margin: 6px 0;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .btns {
+            display: flex;
+            justify-content: center;
+            padding: 12px;
+            border-top: 1px solid #dddddd;
+        }
+
+        .btns button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btns button:hover {
+            background-color: #0056b3;
+        }
+
+        footer {
+            text-align: center;
+            margin-bottom: 0;
+            padding: 10px 0;
+            background-color: black;
+            color: #ffffff;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Select a Mechanic (Sorted by Nearest)</h2>
+    <div class="container">
+        {% for worker in workers %}
+        <div class="card">
+            <div class="card-content">
+                <div class="worker-name">{{ worker.name }}</div>
+                <p>Specialization: {{ worker.special }}</p>
+                <p>Distance: {{ worker.distance|floatformat:2 }} km</p>
+                <p>Phone: {{ worker.phone }}</p>
+                <p>Email: {{ worker.mail }}</p>
+            </div>
+            <div class="btns">
+                <form action="{% url 'finalize_booking' %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="worker" value="{{ worker.id }}">
+                    <input type="hidden" name="user_id" value="{{ user_id }}">
+                    <input type="hidden" name="vehicle_type" value="{{ vehicle_type }}">
+                    <input type="hidden" name="issue" value="{{ issue }}">
+                    <input type="hidden" name="latitude" value="{{ latitude }}">
+                    <input type="hidden" name="longitude" value="{{ longitude }}">
+                    <button type="submit">Book Now</button>
+                </form>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card">
+            <div class="card-content">
+                <p>No mechanics available for this issue.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <footer>
+        <p>&copy; 2024 Your Company. All rights reserved.</p>
+        <a href="{% url 'book_mechanic' %}" style="color: white;">Back to Booking</a>
+    </footer>
+</body>
+</html>
