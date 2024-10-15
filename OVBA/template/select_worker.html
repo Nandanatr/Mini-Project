@@ -5,17 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Select Mechanic</title>
     <style>
+        /* General styles */
         body {
             font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #363369, #00c6ff);
+            background-color: #1a1a1a;  /* Black background */
+            color: #f0e68c;  /* Medium dark yellow text */
             margin: 0;
-            padding: 20px;
-            color: #333;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         h2 {
             text-align: center;
-            color: white;
+            color: #ffd700;  /* Bright yellow for the heading */
+            margin-top: 20px;
         }
 
         .container {
@@ -23,65 +28,100 @@
             flex-wrap: wrap;
             gap: 20px;
             justify-content: center;
+            padding: 20px;
+            flex-grow: 1;
         }
 
         .card {
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
+            background-color: #333;  /* Dark background for cards */
+            border: 1px solid #444;  /* Darker border */
             border-radius: 8px;
-            width: 300px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            width: 250px;  /* Keep the width the same */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
+            padding: 10px;  /* Reduce padding to shrink card height */
         }
+        
+        .card-content {
+            padding: 10px;  /* Reduce inner padding */
+        }
+        
+        .worker-name {
+            font-size: 16px;  /* Decrease font size */
+            margin-bottom: 4px;  /* Smaller margin */
+        }
+        
+        .card p {
+            font-size: 12px;  /* Reduce font size for text */
+            margin: 2px 0;  /* Reduce margin between lines */
+        }
+        
+        .btns {
+            padding: 8px 0;  /* Smaller padding for the buttons area */
+        }
+        
+        .btns button {
+            padding: 6px 12px;  /* Decrease button size */
+        }
+        
 
         .card:hover {
             transform: translateY(-5px);
         }
 
         .card-content {
-            padding: 16px;
+            padding: 20px;  /* Adjusted padding */
         }
 
         .worker-name {
             font-weight: bold;
+            color: #ffd700;  /* Yellow for the worker name */
             margin-bottom: 8px;
         }
 
         .card p {
-            margin: 6px 0;
+            margin: 4px 0;  /* Smaller margins for compact text */
             font-size: 14px;
-            color: #666666;
+            color: #f0e68c;  /* Medium dark yellow for text */
         }
 
         .btns {
             display: flex;
             justify-content: center;
-            padding: 12px;
-            border-top: 1px solid #dddddd;
+            padding: 10px;
+            border-top: 1px solid #444;  /* Darker border on top */
         }
 
         .btns button {
-            padding: 10px 20px;
+            padding: 8px 16px;  /* Smaller button size */
             border: none;
-            background-color: #007bff;
-            color: white;
+            background-color: #ffd700;  /* Bright yellow button */
+            color: black;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
         }
 
         .btns button:hover {
-            background-color: #0056b3;
+            background-color: #f0e68c;  /* Lighter yellow on hover */
         }
 
         footer {
-            text-align: center;
-            margin-bottom: 0;
-            padding: 10px 0;
             background-color: black;
-            color: #ffffff;
+            color: #f0e68c;  /* Medium dark yellow */
+            padding: 10px 0;
+            text-align: center;
             font-size: 14px;
+            margin-top: auto;  /* Ensures footer stays at the bottom */
+        }
+
+        footer a {
+            color: #ffd700;  /* Bright yellow link color */
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            color: #f0e68c;  /* Lighter yellow on hover */
         }
     </style>
 </head>
@@ -91,7 +131,7 @@
         {% for worker in workers %}
         <div class="card">
             <div class="card-content">
-                <div class="worker-name">{{ worker.name }}</div>
+                <div class="worker-name">Name: {{ worker.name }}</div>
                 <p>Specialization: {{ worker.special }}</p>
                 <p>Distance: {{ worker.distance|floatformat:2 }} km</p>
                 <p>Phone: {{ worker.phone }}</p>
@@ -120,7 +160,7 @@
     </div>
     <footer>
         <p>&copy; 2024 Your Company. All rights reserved.</p>
-        <a href="{% url 'book_mechanic' %}" style="color: white;">Back to Booking</a>
+        <a href="{% url 'book_mechanic' %}">Back to Booking</a>
     </footer>
 </body>
 </html>

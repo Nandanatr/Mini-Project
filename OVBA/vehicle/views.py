@@ -27,6 +27,7 @@ from twilio.rest import Client
 import json
 import requests
 import math
+from geopy.geocoders import Nominatim
 
 
 
@@ -414,6 +415,7 @@ def finalize_booking(request):
                 worker=worker_instance,  # Use the actual Worker instance
                 vehicle_type=vehicle_type,
                 issue=issue,
+                status='pending',
                 latitude=latitude,
                 longitude=longitude,
             )
@@ -1026,3 +1028,36 @@ def delete_shop(request, shop_id):
         return JsonResponse({'message': 'Shop deleted successfully.'}, status=200)
     except shopdetails.DoesNotExist:
         return JsonResponse({'error': 'Shop not found.'}, status=404)
+
+
+
+def view_requests(request):
+    # Assume you already have the mechanic's requests stored
+    if 'wid' in request.session:
+        uname = request.session['wid']
+        data = worker.objects.get(username=uname)
+        
+        print(data)
+        
+        
+    
+        bookings = Booking.objects.filter(worker=data.name)
+        
+        print('boo',bookings)
+                                        
+
+        # Use geopy to get the location name from lat, long
+        geolocator = Nominatim(user_agent="vehicle_breakdown_service")
+        
+        # Prepare the booking data with actual addresses
+        booking_details = []
+        for booking in bookings:
+            location = geolocator.reverse(f"{booking.latitude}, {booking.longitude}")
+            address = location.address if location else "Location not found"
+            booking_details.append({
+                'vehicle_type': booking.vehicle_type,
+                'issue': booking.issue,
+                'location': address
+            })
+        
+        return render(request, 'view_requests.html', {'bookings': booking_details})

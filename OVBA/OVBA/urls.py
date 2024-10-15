@@ -71,6 +71,7 @@ urlpatterns = [
     path('adcomp',views.openadvcomp),
     path('send-warning-sms/', views.send_warning_sms, name='send_warning_sms'),
     path('shops/delete/<int:shop_id>/', views.delete_shop, name='delete_shop'),
+    path('wrreq',views.view_requests),
     
     
     

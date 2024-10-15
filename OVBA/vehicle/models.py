@@ -68,6 +68,7 @@ class Booking(models.Model):
     issue = models.CharField(max_length=100)
     latitude = models.FloatField()
     longitude = models.FloatField()
+    status = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
 
     
