@@ -36,7 +36,7 @@
             background-color: #333;  /* Dark background for cards */
             border: 1px solid #444;  /* Darker border */
             border-radius: 8px;
-            height: 210px;
+            height: 245px;
             width: 250px;  /* Keep the width the same */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
@@ -135,6 +135,8 @@
                 <div class="worker-name">Name: {{ worker.name }}</div>
                 <p>Specialization: {{ worker.special }}</p>
                 <p>Distance: {{ worker.distance|floatformat:2 }} km</p>
+                <p>Shop: {{ worker.shopname }}</p>
+                <p>Location: {{ worker.dist }}</p>
                 <p>Phone: {{ worker.phone }}</p>
                 <p>Email: {{ worker.mail }}</p>
                 <p>Rating: {{ worker.rating}}</p>

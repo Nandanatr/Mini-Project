@@ -323,16 +323,16 @@ def book_mechanic(request):
     if request.method == 'POST':
         if 'uid' in request.session:
             uname = request.session['uid']
-            
+
             try:
                 user = register.objects.get(username=uname)
             except register.DoesNotExist:
                 return JsonResponse({'error': 'User does not exist'}, status=400)
-            
+
             vehicle_type = request.POST.get('vehicle_type')
             issue = request.POST.get('issue')
             location = request.POST.get('location')  # Expecting format 'lat,lng'
-            
+
             if vehicle_type and issue and location:
                 try:
                     lati, longi = map(float, location.split(','))
@@ -341,56 +341,65 @@ def book_mechanic(request):
 
                 # Find workers specializing in the user's issue
                 workers = worker.objects.filter(special=issue)
-                print('work',workers)
-                
+
+                if not workers.exists():
+                    return JsonResponse({'error': 'No workers found for this issue'}, status=404)
+
                 # Calculate the distance to each worker
                 workers_with_distance = []
                 for worker_instance in workers:
                     worker_latitude = worker_instance.latitude
                     worker_longitude = worker_instance.longitude
-                    
-                    print('lat',worker_latitude)
-                    print('long',worker_longitude)
-                    
-                    # Calculate distance using Haversine formula
-                    distance = haversine(lati, longi, worker_latitude, worker_longitude)
-                    workers_with_distance.append((worker_instance, distance))
+
+                    if worker_latitude is not None and worker_longitude is not None:
+                        # Calculate distance using Haversine formula
+                        distance = haversine(lati, longi, worker_latitude, worker_longitude)
+                        
+                        # Get the shopname from the shopdetails model based on worker's username
+                        try:
+                            shop = shopdetails.objects.get(username=worker_instance.user)
+                            shop_name = shop.shopname
+                        except shopdetails.DoesNotExist:
+                            shop_name = 'Unknown Shop'
+
+                        workers_with_distance.append((worker_instance, distance, shop_name))
 
                 # Sort workers by distance (closest first)
                 workers_with_distance.sort(key=lambda x: x[1])
 
                 # Prepare worker data for frontend
-                worker_list = []  # Initialize an empty list to hold the worker details.
+                worker_list = []
 
-                for work, distance in workers_with_distance:  # Iterate over each worker and their distance.
-                    worker_details = {  # Create a dictionary for each worker's details.
+                for work, distance, shop_name in workers_with_distance:
+                    worker_details = {
                         'id': work.id,
                         'name': work.name,
                         'special': work.special,
                         'distance': distance,
-                        'phone':work.phone,
-                        'mail':work.mail,
-                        'rating':work.rating
+                        'phone': work.phone,
+                        'mail': work.mail,
+                        'rating': work.rating,
+                        'dist': work.district,
+                        'shopname': shop_name, 
                     }
-                    worker_list.append(worker_details)  # Append the dictionary to the worker_list.
-
+                    worker_list.append(worker_details)
 
                 context = {
                     'workers': worker_list,
                     'vehicle_type': vehicle_type,
                     'issue': issue,
-                    'latitude': lati,  # Pass latitude separately
-                    'longitude': longi,  # Pass longitude separately
-                    'user_id': user.id,  # Include user ID if needed
+                    'latitude': lati,
+                    'longitude': longi,
+                    'user_id': user.id,
                 }
-                
+
                 return render(request, 'select_worker.html', context)
             else:
                 return JsonResponse({'error': 'Missing required data'}, status=400)
         else:
             return JsonResponse({'error': 'User not logged in'}, status=403)
 
-    return render(request,'index.html')
+    return render(request, 'index.html')
 
 def finalize_booking(request):
     if request.method == 'POST':
