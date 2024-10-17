@@ -135,7 +135,8 @@ def profile(request):
         return render(request, 'mindex.html')
     elif 'wid' in request.session:
         data = request.session['wid']
-        return render(request,'workindex.html')
+        user = worker.objects.get(username=data)
+        return render(request,'workindex.html',{'data':user})
     elif 'aid' in request.session:
         data = request.session['aid']
         data3 = register.objects.filter(username=data)
@@ -369,6 +370,7 @@ def book_mechanic(request):
                         'distance': distance,
                         'phone':work.phone,
                         'mail':work.mail,
+                        'rating':work.rating
                     }
                     worker_list.append(worker_details)  # Append the dictionary to the worker_list.
 
@@ -388,7 +390,7 @@ def book_mechanic(request):
         else:
             return JsonResponse({'error': 'User not logged in'}, status=403)
 
-    return render(request, 'book_mechanic.html')
+    return render(request,'index.html')
 
 def finalize_booking(request):
     if request.method == 'POST':
@@ -421,9 +423,34 @@ def finalize_booking(request):
             )
             booking.save()
 
-            return JsonResponse({'success': True, 'message': 'Booking confirmed!'})
+            # Twilio credentials (hardcoded or securely retrieved from environment variables)
+            account_sid = 'ACf01e3a7d0721444522effabf8b8fa51a'  # Replace with your Twilio Account SID
+            auth_token = '007bce032388b683a8f54842404b175f'  # Replace with your Twilio Auth Token
+            twilio_phone_number = '+15738792764'  # Replace with your Twilio phone number
+         
+            # Initialize the Twilio client
+            client = Client(account_sid, auth_token)
+
+            # Send an SMS to the worker using Twilio
+            worker_phone_number = '+91' + worker_instance.phone  # Assuming there's a phone_number field in the Worker model
+            try:
+                message = client.messages.create(
+                    body=f"You have a new booking request for a {vehicle_type}. Issue: {issue}. Please review and accept/reject the request\n From RepairHub ✌️",
+                    from_=twilio_phone_number,
+                    to=worker_phone_number  # Send SMS to worker's registered phone number
+                )
+                sms_status = f'SMS sent successfully with SID {message.sid}'
+            except Exception as e:
+                sms_status = f'SMS sending failed: {str(e)}'
+
+            return render(request,'booksucc.html')
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def afterbook(request):
+    return render(request,'index.html')
+
+
 def openrequest(request):
     
     data = shopdetails.objects.all()
@@ -582,6 +609,7 @@ def addworker(request):
 
             # Geocode the district to get latitude and longitude
             latitude, longitude = geocode_location(district)
+            print(latitude,longitude)
             if latitude is None or longitude is None:
                 return HttpResponse('<script>alert("Invalid location. Please try again."); window.history.back();</script>')
 
@@ -598,6 +626,7 @@ def addworker(request):
                     password=wpass,
                     state=state,
                     district=district,
+                    rating = 0,
                     pin=pin,
                     latitude=latitude,  # Store latitude
                     longitude=longitude  # Store longitude
@@ -757,6 +786,7 @@ def book_service(request):
         phone = request.POST.get('phone')
         sh = request.POST.get('shop')
         vehicle = request.POST.get('vehicle')
+        vehinum = request.POST.get('vnum')
         service_types = request.POST.getlist('service[]')
         other_service = request.POST.get('other_service', '').strip()
         Date = request.POST.get('date')
@@ -786,6 +816,7 @@ def book_service(request):
                 phone=phone,
                 shop=sh,
                 vehicle=vehicle,
+                vehiclenum = vehinum,
                 serv_type=', '.join(service_types),  # Store service types as a comma-separated string
                 date=Date,
                 time=Time,
@@ -1002,7 +1033,7 @@ def send_warning_sms(request):
   
         message_body = f"Warning: The shop {shop.shopname} has received a bad review! If this continue we will terminate your account\n From RepairHub 🥰"
         TWILIO_ACCOUNT_SID = 'ACf01e3a7d0721444522effabf8b8fa51a'
-        TWILIO_AUTH_TOKEN = '321eff82b17787b15aae04ceaadd4081'
+        TWILIO_AUTH_TOKEN = '007bce032388b683a8f54842404b175f'
         TWILIO_PHONE_NUMBER = '+15738792764'
 
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -1037,13 +1068,13 @@ def view_requests(request):
         uname = request.session['wid']
         data = worker.objects.get(username=uname)
         
-        print(data)
+        # print(data)
         
         
     
         bookings = Booking.objects.filter(worker=data.name)
         
-        print('boo',bookings)
+        # print('boo',bookings)
                                         
 
         # Use geopy to get the location name from lat, long
@@ -1054,10 +1085,103 @@ def view_requests(request):
         for booking in bookings:
             location = geolocator.reverse(f"{booking.latitude}, {booking.longitude}")
             address = location.address if location else "Location not found"
+            # print(address)
             booking_details.append({
+                'user':booking.user,
                 'vehicle_type': booking.vehicle_type,
                 'issue': booking.issue,
-                'location': address
+                'location': address,
+                'status':booking.status,
+                'id':booking.id
             })
         
         return render(request, 'view_requests.html', {'bookings': booking_details})
+    
+    
+def userbookreqopen(request):
+    if 'uid' in request.session:
+        uname = request.session['uid']
+        user_data = register.objects.get(username=uname)  
+        bookings = Booking.objects.filter(user=user_data)  
+        
+       
+        geolocator = Nominatim(user_agent="vehicle_app")
+
+        
+        booking_data = []
+        for booking in bookings:
+            location = geolocator.reverse((booking.latitude, booking.longitude), exactly_one=True)
+            address = location.address if location else "Unknown location"
+            booking_data.append({
+                'worker': booking.worker,
+                'vehicle_type': booking.vehicle_type,
+                'issue': booking.issue,
+                'address': address,  # Human-readable address
+                'status': booking.status,
+                'created_at': booking.created_at,
+            })
+
+        if booking_data:
+            return render(request, 'userbookreqopen.html', {'bookings': booking_data})
+        else:
+            return render(request, 'userbookreqopen.html', {'message': 'No bookings found.'})
+    return render(request, 'login.html')
+
+
+def handle_request(request):
+    if request.method == 'POST':
+        booking_id = request.POST.get('booking_id')
+        action = request.POST.get('action')
+   
+        if booking_id:
+            # Fetch booking or return 404 if not found
+            booking = get_object_or_404(Booking, id=booking_id)
+            
+            # Get the user who made the booking (assuming the user field is linked to the register model)
+            user_email = booking.user.mail
+            user_name = booking.user.name
+            
+            # Update the booking status based on action
+            if action == 'accept':
+                booking.status = 'Accepted'
+                subject = "Your Booking has been Accepted"
+                message = f"Dear {user_name}, your booking with ID {booking.id} has been accepted."
+            elif action == 'reject':
+                booking.delete()
+                subject = "Your Booking has been Rejected"
+                message = f"Dear {user_name}, your booking with ID {booking_id} has been rejected."
+                send_mail(subject, message, 'your_email@example.com', [user_email], fail_silently=False)
+                return HttpResponse("Booking has been removed and an email has been sent to the user.")
+            
+            booking.save()
+            
+            # Send an email to the user
+            send_mail(subject, message, 'your_email@example.com', [user_email], fail_silently=False)
+
+            return HttpResponse(f"Booking {booking.id} has been {booking.status}, and an email has been sent to the user.")
+    
+    # In case the method is not POST, return an appropriate message
+    return HttpResponse("Invalid request.")
+
+def rate_worker(request):
+    if request.method == 'POST':
+        worker_name = request.POST.get('worker_name')
+        rating = request.POST.get('rating')
+
+        try:
+            # Fetch the worker
+            workers = worker.objects.get(name=worker_name)  # Adjust this line as necessary
+
+            # Update the worker's rating
+            if rating == 'good':
+                workers.rating += 1  # Increment rating
+            elif rating == 'bad':
+                workers.rating -= 1  # Decrement rating (if needed, adjust logic as per requirements)
+
+            workers.save()
+            # Return a JSON response
+            return JsonResponse({"message": f"Worker {worker_name} has been rated as {rating}."})
+        except worker.DoesNotExist:
+            return JsonResponse({"error": f"No worker matches the name '{worker_name}'."}, status=404)
+
+    return JsonResponse({"error": "Invalid request."}, status=400)

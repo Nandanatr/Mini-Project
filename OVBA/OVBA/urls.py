@@ -37,6 +37,7 @@ urlpatterns = [
     path('book',views.book),
     path('book_mechanic/', views.book_mechanic, name='book_mechanic'),
     path('finalize_booking/', views.finalize_booking, name='finalize_booking'),
+    path('back',views.afterbook),
     path('adreq',views.openrequest),
     path('accept_shop/', views.accept_shop, name='accept_shop'),
     path('reject_shop/', views.reject_shop, name='reject_shop'),
@@ -72,6 +73,9 @@ urlpatterns = [
     path('send-warning-sms/', views.send_warning_sms, name='send_warning_sms'),
     path('shops/delete/<int:shop_id>/', views.delete_shop, name='delete_shop'),
     path('wrreq',views.view_requests),
+    path('breq',views.userbookreqopen),
+    path('handle_request/', views.handle_request, name='handle_request'),
+    path('rate_worker', views.rate_worker),
     
     
     

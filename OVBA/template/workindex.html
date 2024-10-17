@@ -108,10 +108,10 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto">
-                        <a href="#" class="nav-item nav-link">Home</a>
+                        <a href="#" class="nav-item nav-link active">Home</a>
                         <a href="wrreq" class="nav-item nav-link">Reqeust</a>
                         <a href="wrprf" class="nav-item nav-link">Profile</a>
-                        <a href="#" class="nav-item nav-link">Logout</a>
+                        <a href="sout" class="nav-item nav-link">Logout</a>
                     </div>
                 </div>
             </nav>
@@ -122,50 +122,13 @@
     <!-- Page Header Start -->
     <div class="container-fluid page-header py-5 bg-light">
         <div class="container text-center py-5">
-            <h1 class="display-2 mb-4">Welcome to Your Mechanic Dashboard</h1>
+            <h1 class="display-2 mb-4">Welcome {{ data.name }} to Your Mechanic Dashboard</h1>
             <p class="lead">Manage your appointments, view reports, and access important information all in one place.</p>
         </div>
     </div>
     <!-- Page Header End -->
 
-    <!-- Dashboard Overview Start -->
-    <div class="container-fluid py-6">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <div class="bg-white p-4 border rounded shadow-sm">
-                        <h4 class="mb-4">Upcoming Appointments</h4>
-                        <ul class="list-unstyled">
-                            <li><strong>September 5, 2024:</strong> Brake inspection</li>
-                            <li><strong>September 6, 2024:</strong> Oil change</li>
-                            <li><strong>September 7, 2024:</strong> Tire rotation</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="bg-white p-4 border rounded shadow-sm">
-                        <h4 class="mb-4">Recent Reports</h4>
-                        <ul class="list-unstyled">
-                            <li><a href="#" class="text-primary">September 2024 Maintenance Report</a></li>
-                            <li><a href="#" class="text-primary">August 2024 Service Summary</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-4">
-                    <div class="bg-white p-4 border rounded shadow-sm">
-                        <h4 class="mb-4">Quick Links</h4>
-                        <ul class="list-unstyled">
-                            <li><a href="#" class="text-primary">Update Profile</a></li>
-                            <li><a href="#" class="text-primary">Manage Appointments</a></li>
-                            <li><a href="#" class="text-primary">View Service History</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Dashboard Overview End -->
-
+   
     <!-- Footer Start -->
     <div class="container-fluid footer py-5 bg-dark text-white">
         <div class="container py-5">

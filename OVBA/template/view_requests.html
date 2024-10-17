@@ -3,18 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>View Requests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+
+        .booking-card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin: 15px;
+            padding: 20px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .booking-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .booking-card p {
+            margin: 10px 0;
+            color: #333;
+        }
+
+        .booking-card p:first-child {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: black;
+        }
+
+        .booking-card .location {
+            color: #FFCC00;
+            font-weight: bold;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-accept {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background-color: #45a049;
+        }
+
+        .btn-reject {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #e53935;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2em;
+            color: #333;
+            margin-top: 30px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: black;
+            color: #FFCC00;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .booking-card {
+                width: 90%;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    {% for booking in bookings %}
-  <div>
-      <p>Vehicle Type: {{ booking.vehicle_type }}</p>
-      <p>Issue: {{ booking.issue }}</p>
-      <p>Location: {{ booking.location }}</p>
-  </div>
-{% endfor %}
+    <h1>View Requests</h1>
 
-    
+    <div class="container">
+        {% for booking in bookings %}
+        <div class="booking-card">
+            <p>Booked by: {{booking.user}}</p>
+            <p>Vehicle Type: {{ booking.vehicle_type }}</p>
+            <p>Issue: {{ booking.issue }}</p>
+            <p class="location">Location: {{ booking.location }}</p>
+            <p>Status: {{ booking.status }}</p>
+            
+            <!-- Accept and Reject buttons -->
+            <div class="button-container">
+                <form action="{% url 'handle_request' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="accept">
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <button type="submit" class="btn btn-accept">Accept</button>
+                </form>
+            
+                <form action="{% url 'handle_request' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reject">
+                    <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                    <button type="submit" class="btn btn-reject">Reject</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer>
+        &copy; 2024 Vehicle Breakdown Assistance
+    </footer>
+
 </body>
 </html>
