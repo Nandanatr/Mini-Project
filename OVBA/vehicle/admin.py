@@ -8,5 +8,5 @@ admin.site.register(worker)
 admin.site.register(Certificate)
 admin.site.register(service)
 admin.site.register(complaint)
-
+admin.site.register(complaintwoker)
 

@@ -132,7 +132,8 @@ def profile(request):
     elif 'mid' in request.session:
         data = request.session['mid']
         data2 = register.objects.filter(username=data)
-        return render(request, 'mindex.html')
+        user = register.objects.get(username=data)
+        return render(request, 'mindex.html',{'data':user})
     elif 'wid' in request.session:
         data = request.session['wid']
         user = worker.objects.get(username=data)
@@ -1171,26 +1172,65 @@ def handle_request(request):
     
     # In case the method is not POST, return an appropriate message
     return HttpResponse("Invalid request.")
-
+@csrf_exempt
 def rate_worker(request):
-    if request.method == 'POST':
-        worker_name = request.POST.get('worker_name')
-        rating = request.POST.get('rating')
+    if 'uid' in request.session:
+        uname = request.session['uid']  # Fix typo here
+        if request.method == 'POST':
+            worker_name = request.POST.get('worker_name')
+            iss = request.POST.get('issue')
+            rating = request.POST.get('rating')
+            
+            try:
+                # Create complaintwoker entry
+                data = complaintwoker.objects.create(
+                    user=uname,
+                    rating=rating,
+                    mechanic=worker_name,
+                    issue=iss
+                )
+                data.save()
 
-        try:
-            # Fetch the worker
-            workers = worker.objects.get(name=worker_name)  # Adjust this line as necessary
+                # Update the worker's rating
+                try:
+                    workers = worker.objects.get(name=worker_name)  # Adjust the query if needed
+                    if rating == 'good':
+                        workers.rating += 1  # Increment rating
+                    elif rating == 'bad':
+                        workers.rating -= 1  # Decrement rating, if your logic requires this
+                    workers.save()
+                    
+                    return JsonResponse({"message": f"Worker {worker_name} has been rated as {rating}."})
+                
+                except worker.DoesNotExist:
+                    return JsonResponse({"error": f"No worker matches the name '{worker_name}'."}, status=404)
 
-            # Update the worker's rating
-            if rating == 'good':
-                workers.rating += 1  # Increment rating
-            elif rating == 'bad':
-                workers.rating -= 1  # Decrement rating (if needed, adjust logic as per requirements)
+            except Exception as e:
+                return JsonResponse({"error": str(e)}, status=500)
 
-            workers.save()
-            # Return a JSON response
-            return JsonResponse({"message": f"Worker {worker_name} has been rated as {rating}."})
-        except worker.DoesNotExist:
-            return JsonResponse({"error": f"No worker matches the name '{worker_name}'."}, status=404)
+    else:
+        return JsonResponse({"error": "Unauthorized: You must be logged in."}, status=403)
 
     return JsonResponse({"error": "Invalid request."}, status=400)
+
+
+def wokercomplaint(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
+        try:
+           
+            user = register.objects.get(username=uname)
+            
+          
+            workers = complaintwoker.objects.filter(user=user)
+            
+         
+            return render(request, 'viewworker.html', {'workers': workers})
+        
+        except register.DoesNotExist:
+            return HttpResponse('<script>alert("User does not exist."); window.history.back();</script>')
+    
+    # Handle cases where 'mid' is not in the session
+    return render(request,'login.html')
+        
+        

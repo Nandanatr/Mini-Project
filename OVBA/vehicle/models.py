@@ -100,3 +100,15 @@ class complaint(models.Model):
     
     def __str__(self):
         return self.user  
+    
+    
+     
+class complaintwoker(models.Model):
+    user = models.CharField(max_length=20)
+    rating = models.CharField(max_length=10)
+    mechanic = models.CharField(max_length=20)
+    issue = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return self.user  
+    

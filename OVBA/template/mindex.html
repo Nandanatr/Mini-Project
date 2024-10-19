@@ -99,7 +99,7 @@
                             </div>
                             
                         </div>
-                        <a href="contact.html" class="nav-item nav-link">Contact Us</a>
+                        <a href="owcompl" class="nav-item nav-link">Complaints</a>
                         <a href="promech" class="nav-item nav-link">Profile</a>
                     </div>
                 </div>
@@ -121,19 +121,19 @@
         <div class="container">
             <!-- Dashboard Header -->
             <div class="dashboard-header text-center mb-4">
-                <h1 class="display-4">Welcome, [Mechanic's Name]!</h1>
-                <p class="lead">Here's your dashboard where you can manage your tasks and settings.</p>
+                <h1 class="display-4">Welcome, <b style="color: yellow;">{{ data }}</b></h1>
+              
             </div>
 
             <!-- Dashboard Overview -->
             <div class="row">
-                <!-- Card 1: Overview -->
+            
                 <div class="col-md-6 col-lg-4">
                     <div class="card dashboard-card">
                         <div class="card-body">
                             <h5 class="card-title">Overview</h5>
-                            <p class="card-text">View a summary of recent activities, upcoming appointments, and performance metrics.</p>
-                            <a href="#" class="btn btn-primary">View Overview</a>
+                            <p class="card-text">Have a closer look at the information regarding your workers.</p>
+                            <a href="owserv" class="btn btn-primary">View Overview</a>
                         </div>
                     </div>
                 </div>
@@ -143,57 +143,24 @@
                     <div class="card dashboard-card">
                         <div class="card-body">
                             <h5 class="card-title">Manage Services</h5>
-                            <p class="card-text">Add, update, or remove services offered by your repair shop.</p>
-                            <a href="#" class="btn btn-primary">Manage Services</a>
+                            <p class="card-text">There's a new service request for your vehicle. Check it out!</p>
+                            <a href="owserv" class="btn btn-primary">Manage Services</a>
                         </div>
                     </div>
                 </div>
 
-                <!-- Card 3: Update About Us -->
                 <div class="col-md-6 col-lg-4">
                     <div class="card dashboard-card">
                         <div class="card-body">
-                            <h5 class="card-title">Update About Us</h5>
-                            <p class="card-text">Edit the information about our repair shop that is displayed on the website.</p>
-                            <button class="btn btn-primary edit-btn" data-bs-toggle="modal" data-bs-target="#editAboutUsModal">Edit About Us</button>
+                            <h5 class="card-title">Complaints</h5>
+                            <p class="card-text">Check out the feedback from others about your workers.</p>
+                            <a href="#" class="btn btn-primary">View Complaints</a>
                         </div>
                     </div>
                 </div>
-            </div>
-
             <!-- Additional Sections -->
-            <div class="row">
-                <!-- Notifications -->
-                <div class="col-md-6 col-lg-4">
-                    <div class="card dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Notifications</h5>
-                            <div class="notifications">
-                                <!-- Notifications content -->
-                                <p><strong>New Appointment:</strong> Service appointment scheduled for August 25th.</p>
-                                <p><strong>Reminder:</strong> Check the oil level in the workshop equipment.</p>
-                                <p><strong>Update:</strong> New service guidelines available in the resources section.</p>
-                                <!-- More notifications can be added here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Activities -->
-                <div class="col-md-6 col-lg-4">
-                    <div class="card dashboard-card">
-                        <div class="card-body">
-                            <h5 class="card-title">Recent Activities</h5>
-                            <div class="recent-activities">
-                                <!-- Recent activities content -->
-                                <p><strong>August 22:</strong> Completed service for Vehicle ID 2345.</p>
-                                <p><strong>August 21:</strong> Received new parts shipment.</p>
-                                <p><strong>August 20:</strong> Updated service schedule.</p>
-                                <!-- More activities can be added here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+ 
+                
             </div>
         </div>
     </div>
