@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Worker Complaints</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1c1c1c;
+            color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column; /* Allows for the footer to be at the bottom */
+            min-height: 100vh; /* Ensures the body takes full height */
+        }
+
+        h2 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background-color: #333;
+            color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            flex: 1; /* Allows the table to take up available space */
+        }
+
+        table th, table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+
+        table thead {
+            background-color: #000;
+            color: #ffd700;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: #444;
+        }
+
+        table tbody tr:hover {
+            background-color: #555;
+            cursor: pointer;
+        }
+
+        table th {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .container {
+            width: 100%;
+        }
+
+        .warning-button {
+            background-color: #ff6347;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0; /* Remove margin */
+        }
+
+        .warning-button:hover {
+            background-color: #ff4500;
+        }
+
+        footer {
+            text-align: center; /* Center align the footer text */
+            margin-top: 20px;
+            padding: 10px 0;
+            background-color: #000;
+            color: #ffd700;
+            font-size: 0.9em;
+            margin-top: 0%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Complaints Overview</h2>
+
+        <!-- Table for displaying complaints related to the workers -->
+        <table>
+            <thead>
+                <tr>
+                    <th>Worker Name</th>
+                    <th>Issue</th>
+                    <th>Rating</th>
+                    <th>User</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for complaint in complaints %}
+                <tr>
+                    <td>{{ complaint.mechanic }}</td>
+                    <td>{{ complaint.issue }}</td>
+                    <td>{{ complaint.rating }}</td>
+                    <td>{{ complaint.user }}</td>
+                    <td>
+                        <form action="send_warning_email" method="post">
+                            {% csrf_token %}
+                            <!-- Hidden input field to send the worker's ID -->
+                            <input type="hidden" name="worker_id" value="{{ complaint.id }}">
+                            <button type="submit" class="warning-button">Send Warning</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script>
+            function sendWarningEmail(form) {
+                // Prevent the default form submission
+                event.preventDefault();
+    
+                // Create a new FormData object
+                const formData = new FormData(form);
+    
+                // Send the AJAX request
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'  // Set the CSRF token header
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Check for success or error message
+                    if (data.message) {
+                        alert(data.message);  // Display success message
+                    } else {
+                        alert(data.error);  // Display error message
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while sending the warning email.');
+                });
+            }
+        </script>
+    </div>
+    <footer>
+        <p>&copy; 2024 <i class="fas fa-copyright"></i> RepairHub, All rights reserved.</p>
+    </footer>
+</body>
+</html>

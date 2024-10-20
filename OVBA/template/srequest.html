@@ -10,7 +10,6 @@
             margin: 0;
             padding: 0;
             background-color: #fff9c4; /* Light yellow background */
-
         }
         
         .container {
@@ -62,8 +61,19 @@
             bottom: 0;
             width: 100%;
         }
-        
-        
+
+        .remove-button {
+            background-color: #dc3545; /* Red background for remove button */
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .remove-button:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
     </style>
 </head>
 <body>
@@ -80,32 +90,42 @@
                     <th>Start Date</th>
                     <th>End Date</th>
                     <th>Status</th>
+                    <th>Action</th> <!-- Added Action column -->
                 </tr>
             </thead>
             <tbody>
                 {% for i in details %}
                 <tr>
-                    <th>{{i.username}}</th>
-                    <th>{{i.shopname}}</th>
-                    <th>{{i.lnumber}}</th>
-                    <th>{{i.place}}</th>
-                    <th>{{i.istate}}</th>
-                    <th>{{i.idate}}</th>
-                    <th>{{i.edate}}</th>
-                    <th>{{i.status}}</th>
-                   
+                    <td>{{ i.username }}</td>
+                    <td>{{ i.shopname }}</td>
+                    <td>{{ i.lnumber }}</td>
+                    <td>{{ i.place }}</td>
+                    <td>{{ i.istate }}</td>
+                    <td>{{ i.idate }}</td>
+                    <td>{{ i.edate }}</td>
+                    <td>{{ i.status }}</td>
+                    <td>
+                        {% if i.status == "confirmed" %}
+                        <!-- Remove Shop Button -->
+                        <form method="POST" action="remove_shop">
+                            {% csrf_token %}
+                            <input type="hidden" name="shop_id" value="{{ i.id }}">
+                            <button type="submit" class="remove-button">Remove Shop</button>
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
                 {% else %}
                 <tr>
                     <td colspan="9" class="no-data">No shop details available</td>
                 </tr>
+                {% endif %}
             </tbody>
-            {% endif %}
         </table>
     </div>
-    <<footer>
-        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+    <footer>
+        <p>&copy; RepairHub, All rights reserved.</p>
     </footer>
 </body>
 </html>

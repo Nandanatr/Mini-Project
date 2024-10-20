@@ -12,7 +12,7 @@
         }
         
         .container {
-            width: 80%;
+            width: 100%; /* Make the container wider */
             margin: auto;
             overflow: hidden;
             padding: 20px;
@@ -25,6 +25,7 @@
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
+            table-layout: fixed; /* Ensures that table doesn't shrink to fit content */
         }
         
         th, td {
@@ -50,6 +51,10 @@
         tr:nth-child(odd) {
             background-color: #f0f0f0; /* Very light grey background for odd rows */
         }
+
+        td:nth-child(11), th:nth-child(11) {
+            width: 100px; /* Ensure the Actions column has enough space */
+        }
         
         footer {
             background-color: #000; /* Black footer background */
@@ -59,6 +64,25 @@
             position: fixed;
             bottom: 0;
             width: 100%;
+        }
+        
+        .delete-button {
+            background-color: #dc3545; /* Red background */
+            color: #fff; /* White text */
+            border: none;
+            padding: 6px 8px; /* Reduced padding for a more compact button */
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 12px; /* Smaller font size */
+        }
+
+        .delete-button:hover {
+            background-color: #c82333; /* Darker red on hover */
+        }
+
+        /* Ensure table doesn't shrink and hide buttons */
+        table th, table td {
+            word-wrap: break-word; /* Prevents text from overflowing the cells */
         }
     </style>
 </head>
@@ -79,7 +103,9 @@
                     <th>Username</th>
                     <th>Password</th>
                     <th>State</th>
+                    <th>District</th>
                     <th>Post Code</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -93,19 +119,27 @@
                     <td>{{ worker.username }}</td>
                     <td>{{ worker.password }}</td>
                     <td>{{ worker.state }}</td>
+                    <td>{{ worker.district }}</td>
                     <td>{{ worker.pin }}</td>
-                    
+                    <td>
+                        <!-- Delete Button -->
+                        <form method="POST" action="delete_worker">
+                            {% csrf_token %}
+                            <input type="hidden" name="worker_id" value="{{ worker.id }}">
+                            <button type="submit" class="delete-button">Delete</button>
+                        </form>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="9" class="no-workers">No workers found.</td>
+                    <td colspan="11" class="no-workers">No workers found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
     <footer>
-        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+        <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All rights reserved.</p>
     </footer>
 </body>
 </html>

@@ -34,7 +34,7 @@ class service(models.Model):
     phone = models.IntegerField()
     shop = models.CharField(max_length=20)
     vehicle = models.CharField(max_length=20)
-    vehiclenum = models.IntegerField()
+    vehiclenum = models.CharField(max_length=20)
     serv_type = models.CharField(max_length=20)
     date = models.DateField()
     time = models.TimeField()

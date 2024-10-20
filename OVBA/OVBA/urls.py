@@ -76,6 +76,10 @@ urlpatterns = [
     path('breq',views.userbookreqopen),
     path('handle_request/', views.handle_request, name='handle_request'),
     path('rate_worker', views.rate_worker),
+    path('owcompl',views.wokercomplaint),
+    path('send_warning_email', views.send_warning_email, name='send_warning_email'),
+    path('delete_worker', views.delete_worker, name='delete_worker'),
+    path('remove_shop',views.remove_shop),
     
     
     

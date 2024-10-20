@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 import re
 from django.contrib.auth.hashers import make_password
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt,csrf_protect
 from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Frame, PageBreak
@@ -149,6 +149,8 @@ def profile(request):
         vehicle_owner_count = register.objects.filter(usertype='vehicleOwner').count()
         mechanical_owner_count = register.objects.filter(usertype='mechanicOwner').count()
         
+        Shops = shopdetails.objects.all().count()
+        
         shopreq = shopdetails.objects.all()
         
         comp = complaint.objects.all()
@@ -160,7 +162,8 @@ def profile(request):
             'vehicle_owner_count': vehicle_owner_count,
             'mechanical_owner_count': mechanical_owner_count,
             'shop':shopreq,
-            'complaints':comp
+            'complaints':comp,
+            'shopcount':Shops
         })
     else:
         return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
@@ -771,8 +774,7 @@ def issue_certificate_view(request):
                     buffer.seek(0)
                     file_content = ContentFile(buffer.read(), 'certificate.pdf')
                     Certificate.objects.create(shop=shop, file=file_content)
-                    
-                return HttpResponse("Certificate issued successfully.")
+                return HttpResponse('<script>alert("Certificate issued successfully."); window.history.back();</script>')
             except shopdetails.DoesNotExist:
                 return HttpResponse("Shop not found.")
     
@@ -864,11 +866,21 @@ def service_list(request):
 def ownerserv(request):
     if 'mid' in request.session:
         user_id = request.session['mid']
-        users = register.objects.get(username=user_id)
-        shopname = shopdetails.objects.get(username=users)
-        data = service.objects.filter(shop=shopname)
-        return render(request,'ownerservice.html',{'data':data})
-    return render(request,'login.html')
+        try:
+            users = register.objects.get(username=user_id)
+        except register.DoesNotExist:
+            return HttpResponse('<script>alert("User does not exist."); window.history.back();</script>')
+
+        try:
+            # Check if the shop exists for the user
+            shopname = shopdetails.objects.get(username=users)
+            data = service.objects.filter(shop=shopname)
+            return render(request, 'ownerservice.html', {'data': data})
+        except shopdetails.DoesNotExist:
+            # Alert if the shop is removed
+            return HttpResponse('<script>alert("Your shop has been removed."); window.history.back();</script>')
+
+    return render(request, 'login.html')
 
 
 def service_detail(request, id):
@@ -1213,24 +1225,119 @@ def rate_worker(request):
 
     return JsonResponse({"error": "Invalid request."}, status=400)
 
-
 def wokercomplaint(request):
-    if 'mid' in request.session:
-        uname = request.session['mid']
+    if 'mid' in request.session:  # Check if the mechanic owner is logged in
+        uname = request.session['mid']  # Retrieve the session data (username for mechanic owner)
+        
         try:
-           
+            # Fetch the mechanic owner's user data from the register model
             user = register.objects.get(username=uname)
             
-          
-            workers = complaintwoker.objects.filter(user=user)
+            # Get all workers that belong to the logged-in user
+            workers = worker.objects.filter(user=user)
             
-         
-            return render(request, 'viewworker.html', {'workers': workers})
+            # Get all complaints related to the workers of the logged-in user
+            complaints = complaintwoker.objects.all()
+            l = []
+            for i in complaints:
+                for j in workers:
+                    if i.mechanic == j.name:
+                        l.append(i)
+                        
+
+           
+           
+            return render(request, 'viewworkercomp.html', {'workers': workers, 'complaints': l})
         
         except register.DoesNotExist:
             return HttpResponse('<script>alert("User does not exist."); window.history.back();</script>')
+
+    # If the mechanic owner is not logged in, redirect them to the login page
+    return render(request, 'login.html')
+
+
+@csrf_exempt
+def send_warning_email(request):
+    if request.method == 'POST':
+        complaint_id = request.POST.get('worker_id')  # Assuming this is the complaint ID now
+        print(f'Complaint ID received: {complaint_id}')
+
+        try:
+            # Fetch the complaint instance
+            complaint_instance = complaintwoker.objects.get(id=int(complaint_id))
+            print(f'Complaint instance found: {complaint_instance}')
+
+            # Now get the associated worker using the mechanic name
+            worker_instance = worker.objects.get(name=complaint_instance.mechanic)  # Match by name
+            print(f'Worker instance found: {worker_instance.name}')  # Debugging line
+
+            # Compose email details
+            subject = 'Warning Notification'
+            message = (
+                f'Dear {worker_instance.name},\n\n'
+                'This is a warning regarding your recent performance.\n\n'
+                'Please review your conduct and ensure adherence to company policies.\n\n'
+                'If you have any questions or require clarification, feel free to reach out.\n\n'
+                'Best Regards,\n'
+                'RepairHub Team'
+            )
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [worker_instance.mail]  # Sending to the worker's email
+            
+            # Send the email
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email,
+                recipient_list=recipient_list,
+                fail_silently=False,
+            )
+
+            return HttpResponse('<script>alert("Warning mail sent successfully."); window.history.back();</script>')
+        
+        except complaintwoker.DoesNotExist:
+            print(f'Complaint with ID {complaint_id} does not exist.')  # Debugging line
+            return JsonResponse({"error": "Complaint not found."}, status=404)
+        except worker.DoesNotExist:
+            print(f'Worker with name {complaint_instance.mechanic} does not exist.')  # Debugging line
+            return JsonResponse({"error": "Worker not found."}, status=404)
+
+    return JsonResponse({"error": "Invalid request."}, status=400)
+
+
+def delete_worker(request):
+    if request.method == 'POST':
+        worker_id = request.POST['worker_id']
+        workers = get_object_or_404(worker, id=worker_id)
+        workers.delete()
+        return HttpResponse('<script>alert("Worker removed successfully."); window.history.back();</script>')
     
-    # Handle cases where 'mid' is not in the session
-    return render(request,'login.html')
+    
+def remove_shop(request):
+    if 'mid' in request.session:
+        uname = request.session['mid']
         
-        
+        if request.method == 'POST':
+            shop_id = request.POST.get('shop_id')
+            
+            try:
+                # Get the shop and delete it
+                shop = shopdetails.objects.get(id=shop_id)
+                shop.delete()
+
+                # Get the user from the register model
+                user = register.objects.get(username=uname)  # Assuming `uname` refers to the username field
+
+                # Delete all workers associated with the user
+                workers = worker.objects.filter(user=user)
+                workers.delete()
+
+                return HttpResponse('<script>alert("Shop and associated workers removed successfully."); window.history.back();</script>')
+            
+            except shopdetails.DoesNotExist:
+                return HttpResponse('<script>alert("Shop not found."); window.history.back();</script>')
+            
+            except register.DoesNotExist:
+                return HttpResponse('<script>alert("User not found."); window.history.back();</script>')
+
+    return HttpResponse('<script>alert("Invalid session or request method."); window.history.back();</script>')
