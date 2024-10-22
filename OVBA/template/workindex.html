@@ -1,10 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    {% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReapirHub</title>
+    <title>RepairHub</title>
 
     <!-- Include Bootstrap CSS for layout and styling -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
@@ -23,76 +23,75 @@
             background-color: #f5f5f5;
             color: #333;
         }
-        
+
+        /* Adjust transparency of topbar */
         .topbar-top {
-            background-color: #007bff;
+            background-color: rgba(253, 200, 7, 0.8); /* Semi-transparent */
             color: #fff;
         }
-        
+
         .topbar-info a {
             color: #fff;
             text-decoration: none;
         }
-        
+
         .topbar-info a:hover {
             text-decoration: underline;
         }
-        
+
+        /* Adjust navbar transparency and text color */
         .navbar {
-            background-color: #343a40;
+            background-color: rgba(52, 58, 64, 0.8); /* Semi-transparent dark background */
         }
-        
+
         .navbar-brand h1 {
+            color: #007bff; /* Brand color */
+        }
+
+        .navbar-nav .nav-link {
+            color: #e0e0e0; /* Changed to lighter color for visibility */
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #fff; /* Change to white on hover */
+        }
+
+        /* Make the page header semi-transparent */
+        .page-header {
+            background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
             color: #007bff;
         }
-        
-        .navbar-nav .nav-link {
+
+        /* Adjust content boxes to be transparent over the background image */
+        .bg-white {
+            background-color: rgba(255, 255, 255, 0.6); /* Semi-transparent white background for dashboard cards */
+            color: #333;
+        }
+
+        /* Footer adjustments for transparency */
+        .footer {
+            background-color: rgba(52, 58, 64, 0.8); /* Semi-transparent footer */
             color: #fff;
         }
-        
-        .navbar-nav .nav-link:hover {
-            color: #007bff;
-        }
-        
-        .page-header {
-            background-color: #e9ecef;
-        }
-        
-        .page-header h1 {
-            color: #007bff;
-        }
-        
-        .bg-white {
-            background-color: #fff;
-        }
-        
-        .bg-dark {
-            background-color: #343a40;
-        }
-        
-        .footer {
-            background-color: #343a40;
-        }
-        
+
         .footer .btn-link {
             color: #fff;
         }
-        
+
         .footer .btn-link:hover {
             color: #007bff;
         }
-        
     </style>
 </head>
 <body>
     <!-- Topbar Start -->
-    <div class="container-fluid topbar-top bg-primary">
+    <div class="container-fluid topbar-top">
         <div class="container">
             <div class="d-flex justify-content-between topbar py-2">
                 <div class="d-flex align-items-center flex-shrink-0 topbar-info">
-                    <a href="#" class="me-4 text-secondary"><i class="fas fa-map-marker-alt me-2 text-dark"></i>  Kottayam</a>
-                    <a href="#" class="me-4 text-secondary"><i class="fas fa-phone-alt me-2 text-dark"></i>  +91 9061250620   </a>
-                    <a href="#" class="text-secondary"><i class="fas fa-envelope me-2 text-dark"></i>  reapirhub@gmail.com</a>
+                    <a href="#" class="me-4 text-secondary"><i class="fas fa-map-marker-alt me-2 text-dark"></i> Kottayam</a>
+                    <a href="#" class="me-4 text-secondary"><i class="fas fa-phone-alt me-2 text-dark"></i> +91 9061250620</a>
+                    <a href="#" class="text-secondary"><i class="fas fa-envelope me-2 text-dark"></i> repairhub@gmail.com</a>
                 </div>
                 <div class="text-end pe-4 me-4 border-end border-dark search-btn">
                     <!-- Optional search form -->
@@ -103,7 +102,7 @@
     <!-- Topbar End -->
 
     <!-- Navbar Start -->
-    <div class="container-fluid bg-dark">
+    <div class="container-fluid">
         <div class="container">
             <nav class="navbar navbar-dark navbar-expand-lg py-lg-0">
                 <a href="#" class="navbar-brand">
@@ -114,8 +113,8 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <div class="navbar-nav ms-auto">
-                        <a href="#" class="nav-item nav-link active">Home</a>
-                        <a href="wrreq" class="nav-item nav-link">Reqeust</a>
+                        <a href="#" class="nav-item nav-link">Home</a>
+                        <a href="wrreq" class="nav-item nav-link">Request</a>
                         <a href="wrprf" class="nav-item nav-link">Profile</a>
                         <a href="sout" class="nav-item nav-link">Logout</a>
                     </div>
@@ -126,26 +125,24 @@
     <!-- Navbar End -->
 
     <!-- Page Header Start -->
-    <div class="container-fluid page-header py-5 bg-light">
+    <div class="container-fluid page-header py-5">
         <div class="container text-center py-5">
-            <h1 class="display-2 mb-4">Welcome {{ data.name }} to Your Mechanic Dashboard</h1>
+            <h1 class="display-2 mb-4">Welcome to Your Mechanic Dashboard</h1>
             <p class="lead">Manage your appointments, view reports, and access important information all in one place.</p>
         </div>
     </div>
     <!-- Page Header End -->
 
-   
-    <!-- Footer Start -->
-    <div class="container-fluid footer py-5 bg-dark text-white">
+    <div class="container-fluid footer py-5">
         <div class="container py-5">
             <div class="row g-4">
-                <div class="col-md-6">
+                <div class="col-md-6 text-start"> <!-- Align content to the left -->
                     <h4 class="text-white fw-bold mb-4">About Us</h4>
                     <p>We provide top-notch mechanic services with a focus on quality and customer satisfaction. Our experienced team is dedicated to ensuring your vehicle runs smoothly and efficiently.</p>
-                    <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All right reserved.</p>
+                    <p>&copy; <i class="fas fa-copyright text-light me-2"></i>RepairHub, All rights reserved.</p>
                 </div>
-                <div class="col-md-6">
-                    <h4 class="text-white fw-bold mb-4">Contact Us</h4>
+                <div class="col-md-6 text-start"> <!-- Align content to the left -->
+                    <h4 class="text-white fw-bold mb-4" style="text-align: center;">Contact Us</h4>
                     <a href="#" class="btn btn-link text-white w-100 text-start ps-0 py-3 border-bottom rounded-0"><i class="fa fa-map-marker-alt me-3"></i>Kottayam</a>
                     <a href="#" class="btn btn-link text-white w-100 text-start ps-0 py-3 border-bottom rounded-0"><i class="fa fa-phone-alt me-3"></i>+91 9061250620</a>
                     <a href="#" class="btn btn-link text-white w-100 text-start ps-0 py-3 border-bottom rounded-0"><i class="fa fa-envelope me-3"></i>repairhub@gmail.com</a>
@@ -153,7 +150,6 @@
             </div>
         </div>
     </div>
-    <!-- Footer End -->
 
     <!-- Include Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

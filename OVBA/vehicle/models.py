@@ -54,6 +54,7 @@ class worker(models.Model):
     password = models.CharField(max_length=100)
     state = models.CharField(max_length=100)
     district = models.CharField(max_length=100)
+    location = models.CharField(max_length=20)
     rating = models.IntegerField()
     pin = models.CharField(max_length=6)
     latitude = models.FloatField(null=True, blank=True)

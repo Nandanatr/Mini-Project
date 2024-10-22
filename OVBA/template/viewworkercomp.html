@@ -91,12 +91,13 @@
 </head>
 <body>
     <div class="container">
-        <h2>Complaints Overview</h2>
+        <h2>Review Overview</h2>
 
         <!-- Table for displaying complaints related to the workers -->
         <table>
             <thead>
                 <tr>
+                    {% if complaints %}
                     <th>Worker Name</th>
                     <th>Issue</th>
                     <th>Rating</th>
@@ -118,9 +119,15 @@
                             <input type="hidden" name="worker_id" value="{{ complaint.id }}">
                             <button type="submit" class="warning-button">Send Warning</button>
                         </form>
+                        {% endfor %}
                     </td>
+                    {% else %}
+                
+                    <td colspan="9" class="no-data">No Reviews available</td>
+                
+                {% endif %}
                 </tr>
-                {% endfor %}
+               
             </tbody>
         </table>
         <script>
@@ -155,8 +162,6 @@
             }
         </script>
     </div>
-    <footer>
-        <p>&copy; 2024 <i class="fas fa-copyright"></i> RepairHub, All rights reserved.</p>
-    </footer>
+    
 </body>
 </html>

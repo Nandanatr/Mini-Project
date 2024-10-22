@@ -120,12 +120,14 @@
             <form id="rateForm">
                 {% csrf_token %}
                 <input type="hidden" id="worker_name" name="worker_name">
-                <label for="issue">Write your issue:</label>
-                <input type="text"  name="issue" placeholder="Enter issue here">
+                <label for="issue">Add your Review:</label>
+                <input type="text"  name="issue" placeholder="">
                 <label for="rating">Rate the worker:</label>
                 <select name="rating" id="rating">
                     <option value="good">Good</option>
-                    <option value="bad">Bad</option>
+                    <option value="satisfied">Satisfied</option>
+                    <option value="poor">Poor</option>
+
                 </select>
                 <button type="button" onclick="submitRating()">Submit</button>
             </form>

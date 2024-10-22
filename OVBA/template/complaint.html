@@ -58,7 +58,6 @@
         .form-group textarea {
             resize: vertical;
             min-height: 100px;
-            
         }
         .form-group input[type="submit"] {
             background: #007bff;
@@ -72,23 +71,25 @@
         }
         .rating {
             display: flex;
-            direction: row-reverse;
+            direction: ltr; /* Ensure stars fill left to right */
             justify-content: center;
             margin-bottom: 15px;
         }
         .rating input {
-            display: none;
+            display: none; /* Hide the radio buttons */
         }
         .rating label {
             font-size: 30px;
             color: #ccc;
             cursor: pointer;
-            transition: color 0.2s;
+            transition: color 0.2s ease-in-out;
         }
-        .rating input:checked ~ label,
         .rating label:hover,
         .rating label:hover ~ label {
-            color: #ffcc00;
+            color: #ffcc00; /* Highlight stars on hover */
+        }
+        .rating input:checked ~ label {
+            color: #ffcc00; /* Highlight selected stars */
         }
         footer {
             text-align: center;
@@ -101,12 +102,11 @@
             font-size: 14px;
         }
     </style>
-    
 </head>
 <body>
     <div class="complaint-form">
         <h2>Complaint Form</h2>
-        <form action="complaint" method="POST">
+        <form id="complaintForm" action="complaint" method="POST" onsubmit="return showAlert()">
             {% csrf_token %}
             <div class="form-group">
                 <label for="name">Name</label>
@@ -124,17 +124,16 @@
             <div class="form-group">
                 <label for="rating">Rating</label>
                 <div class="rating">
-                    <input type="radio" id="star10" name="rating" value="10"><label for="star10" title="10 stars">★</label>
-                    <input type="radio" id="star9" name="rating" value="9"><label for="star9" title="9 stars">★</label>
-                    <input type="radio" id="star8" name="rating" value="8"><label for="star8" title="8 stars">★</label>
-                    <input type="radio" id="star7" name="rating" value="7"><label for="star7" title="7 stars">★</label>
-                    <input type="radio" id="star6" name="rating" value="6"><label for="star6" title="6 stars">★</label>
-                    <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 stars">★</label>
-                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars">★</label>
-                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">★</label>
-                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">★</label>
                     <input type="radio" id="star1" name="rating" value="1"><label for="star1" title="1 star">★</label>
-
+                    <input type="radio" id="star2" name="rating" value="2"><label for="star2" title="2 stars">★</label>
+                    <input type="radio" id="star3" name="rating" value="3"><label for="star3" title="3 stars">★</label>
+                    <input type="radio" id="star4" name="rating" value="4"><label for="star4" title="4 stars">★</label>
+                    <input type="radio" id="star5" name="rating" value="5"><label for="star5" title="5 stars">★</label>
+                    <input type="radio" id="star6" name="rating" value="6"><label for="star6" title="6 stars">★</label>
+                    <input type="radio" id="star7" name="rating" value="7"><label for="star7" title="7 stars">★</label>
+                    <input type="radio" id="star8" name="rating" value="8"><label for="star8" title="8 stars">★</label>
+                    <input type="radio" id="star9" name="rating" value="9"><label for="star9" title="9 stars">★</label>
+                    <input type="radio" id="star10" name="rating" value="10"><label for="star10" title="10 stars">★</label>
                 </div>
             </div>
             <div class="form-group">
@@ -171,73 +170,46 @@
     </footer>
 
     <script>
+        // Function to show alert on form submission
+        function showAlert() {
+            //alert("Thank you for your submission! Your complaint has been recorded.");
+            return true; // Return true to allow form submission
+        }
+
         document.querySelectorAll('.rating label').forEach(label => {
             label.addEventListener('click', function() {
                 const rating = this.getAttribute('for').replace('star', '');
                 document.querySelectorAll('.rating label').forEach(lbl => {
-                    lbl.style.color = '#ccc';
+                    lbl.style.color = '#ccc'; // Reset all star colors
                 });
                 for (let i = 1; i <= rating; i++) {
-                    document.querySelector(`label[for="star${i}"]`).style.color = '#ffcc00';
+                    document.querySelector(`label[for="star${i}"]`).style.color = '#ffcc00'; // Set color for selected stars
                 }
             });
         });
 
-        document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const rating = document.querySelector('input[name="rating"]:checked').value;
-            const formData = new FormData(this);
-            formData.append('rating', rating);
-            fetch(this.action, {
-                method: this.method,
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            }).then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong');
+        document.querySelectorAll('.rating label').forEach(label => {
+            label.addEventListener('mouseover', function() {
+                const rating = this.getAttribute('for').replace('star', '');
+                for (let i = 1; i <= rating; i++) {
+                    document.querySelector(`label[for="star${i}"]`).style.color = '#ffcc00'; // Highlight stars on hover
                 }
-            }).then(data => {
-                console.log('Success:', data);
-            }).catch(error => {
-                console.error('Error:', error);
+            });
+
+            label.addEventListener('mouseout', function() {
+                const checked = document.querySelector('.rating input:checked');
+                if (!checked) {
+                    document.querySelectorAll('.rating label').forEach(lbl => {
+                        lbl.style.color = '#ccc'; // Reset all star colors if no rating is selected
+                    });
+                } else {
+                    const rating = checked.getAttribute('for').replace('star', '');
+                    for (let i = 1; i <= rating; i++) {
+                        document.querySelector(`label[for="star${i}"]`).style.color = '#ffcc00'; // Set color for selected stars
+                    }
+                }
             });
         });
     </script>
-    <script>
-        document.querySelector('form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const rating = document.querySelector('input[name="rating"]:checked').value;
-            const formData = new FormData(this);
-            formData.append('rating', rating);
-            fetch(this.action, {
-                method: this.method,
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                },
-            }).then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    throw new Error('Something went wrong');
-                }
-            }).then(data => {
-                // Show an alert box based on the response
-                if (data.message) {
-                    alert(data.message); // Complaint submitted successfully
-                } else {
-                    alert('Failed to submit complaint: ' + data.error); // Complaint submission failed
-                }
-            }).catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while submitting the complaint');
-            });
-        });
-    </script>
-    
 </body>
 </html>

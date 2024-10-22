@@ -287,6 +287,8 @@ def shopreg(request):
        
         return render(request, 'oshopreg.html', {'message': 'Something Went Wrong Please Try Again Later.'})
     
+    
+# after shopreg return to index 
 def afterorder(request):
     return render(request,'mindex.html')
             
@@ -384,6 +386,7 @@ def book_mechanic(request):
                         'mail': work.mail,
                         'rating': work.rating,
                         'dist': work.district,
+                        'loca':work.location,
                         'shopname': shop_name, 
                     }
                     worker_list.append(worker_details)
@@ -438,7 +441,7 @@ def finalize_booking(request):
 
             # Twilio credentials (hardcoded or securely retrieved from environment variables)
             account_sid = 'ACf01e3a7d0721444522effabf8b8fa51a'  # Replace with your Twilio Account SID
-            auth_token = '007bce032388b683a8f54842404b175f'  # Replace with your Twilio Auth Token
+            auth_token = 'baccfff86e7c6126763fe165e11ef9bf'  # Replace with your Twilio Auth Token
             twilio_phone_number = '+15738792764'  # Replace with your Twilio phone number
          
             # Initialize the Twilio client
@@ -579,50 +582,63 @@ def add_workeropen(request):
     
     else:
         return HttpResponse('<script>alert("Invalid Account"); window.history.back();</script>')
-    
-
 def geocode_location(location_name):
     url = f'https://nominatim.openstreetmap.org/search?q={location_name}&format=json'
-    response = requests.get(url)
-    location_data = response.json()
+    
+    headers = {
+        'User-Agent': 'OVBA/1.0 (repairhub003@gmail.com)' 
+    }
+    
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # Raise an error for bad responses
+        
+        location_data = response.json()
+        if location_data:
+            latitude = float(location_data[0]['lat'])
+            longitude = float(location_data[0]['lon'])
+            return latitude, longitude
+        else:
+            print(f"Location not found for: {location_name}")
+            return None, None  # Handle case when location isn't found
+    except requests.RequestException as e:
+        print(f"Error during geocoding request for '{location_name}': {e}")
+        return None, None  # Return None if there's an error with the request
 
-    if location_data:
-        latitude = location_data[0]['lat']
-        longitude = location_data[0]['lon']
-        return float(latitude), float(longitude)
-    else:
-        return None, None  # Handle case when location isn't found
-
+    
 def addworker(request):
     if request.method == 'POST':
         if 'mid' in request.session:
             uname = request.session['mid']
-            
+
             try:
                 user = register.objects.get(username=uname)
             except register.DoesNotExist:
                 return HttpResponse('<script>alert("Invalid user."); window.history.back();</script>')
 
+            # Retrieve form data
             name = request.POST.get('name')
             phone = request.POST.get('phone')
             mail = request.POST.get('email')
             adhar = request.POST.get('adhar')
             special = request.POST.get('special')
-            uname = request.POST.get('username')
+            username = request.POST.get('username')
             wpass = request.POST.get('pass')
             state = request.POST.get('state')
-            district = request.POST.get('district')  # Capture district
+            district = request.POST.get('district')
+            loca = request.POST.get('loc')
             pin = request.POST.get('pin')
 
+            # Input validation
             if len(adhar) != 12 or not re.match(r'^\d{12}$', adhar):
                 return HttpResponse('<script>alert("Enter valid Aadhar number."); window.history.back();</script>')
-             
+
             if len(phone) != 10 or not re.match(r'^\d{10}$', phone):
                 return HttpResponse('<script>alert("Enter valid phone number."); window.history.back();</script>')
 
             # Geocode the district to get latitude and longitude
-            latitude, longitude = geocode_location(district)
-            print(latitude,longitude)
+            latitude, longitude = geocode_location(loca)
+            print('latlong', latitude, longitude)
             if latitude is None or longitude is None:
                 return HttpResponse('<script>alert("Invalid location. Please try again."); window.history.back();</script>')
 
@@ -635,20 +651,20 @@ def addworker(request):
                     mail=mail,
                     adhar=adhar,
                     special=special,
-                    username=uname,
+                    username=username,  # Use username variable instead of uname to avoid confusion
                     password=wpass,
                     state=state,
                     district=district,
-                    rating = 0,
+                    location=loca,
+                    rating=0,  # Default rating
                     pin=pin,
                     latitude=latitude,  # Store latitude
                     longitude=longitude  # Store longitude
                 )
-                workers.save()
 
                 return render(request, 'worksucc.html', {'data': workers})
             except Exception as e:
-                return HttpResponse(f'<script>alert("An error occurred: {e}"); window.history.back();</script>')
+                return HttpResponse(f'<script>alert("An error occurred while saving: {e}"); window.history.back();</script>')
 
     return render(request, 'mindex.html')
 
@@ -702,6 +718,8 @@ def logout(request):
         return render(request,'login.html')
     elif 'aid' in request.session:
         request.session.flush()
+        return render(request,'login.html')
+    else:
         return render(request,'login.html')
         
 def remove_worker(request, worker_id):
@@ -899,7 +917,16 @@ def update_service(request, id):
         services.cash = cash
         services.save()
 
-        return render(request,'serupsucc.html') 
+        # Send mail after update
+        send_mail(
+            subject='Vehicle Service Update Notification',
+            message=f'The status of your service request has been updated to: {status}. The total charge is: {cash}.',
+            from_email=settings.EMAIL_HOST_USER,  # Replace with your sender email
+            recipient_list=[services.email],  # Assuming 'customer_email' is a field in the service model
+            fail_silently=False,
+        )
+
+        return render(request, 'serupsucc.html')
 
     return render(request, 'update_service.html', {'service': service})
 def mind(request):
@@ -1007,7 +1034,7 @@ def submit_complaint(request):
                 issue=complaint_desc
             )
 
-            return JsonResponse({'message': 'Complaint submitted successfully!'})
+            return HttpResponse('<script>alert("Complaint submited succesfully."); window.history.back();</script>')
         
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
@@ -1055,7 +1082,7 @@ def send_warning_sms(request):
   
         message_body = f"Warning: The shop {shop.shopname} has received a bad review! If this continue we will terminate your account\n From RepairHub 🥰"
         TWILIO_ACCOUNT_SID = 'ACf01e3a7d0721444522effabf8b8fa51a'
-        TWILIO_AUTH_TOKEN = '007bce032388b683a8f54842404b175f'
+        TWILIO_AUTH_TOKEN = 'baccfff86e7c6126763fe165e11ef9bf'
         TWILIO_PHONE_NUMBER = '+15738792764'
 
         client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
@@ -1162,16 +1189,17 @@ def handle_request(request):
             # Get the user who made the booking (assuming the user field is linked to the register model)
             user_email = booking.user.mail
             user_name = booking.user.name
+            user_issue = booking.issue
             
             # Update the booking status based on action
             if action == 'accept':
                 booking.status = 'Accepted'
-                subject = "Your Booking has been Accepted"
-                message = f"Dear {user_name}, your booking with ID {booking.id} has been accepted."
+                subject = "Your Mechanic Booking has been Accepted"
+                message = f"Dear {user_name}, your booking with the issue  {user_issue} has been successfully accepted. We will be addressing your request shortly. Thank you for choosing our service!"
             elif action == 'reject':
                 booking.delete()
                 subject = "Your Booking has been Rejected"
-                message = f"Dear {user_name}, your booking with ID {booking_id} has been rejected."
+                message = "fDear {user_name}, we regret to inform you that your booking with ID {booking_id} and issue of {user_issue} has been rejected. If you have any questions or would like to reschedule, please don't hesitate to contact us."
                 send_mail(subject, message, 'your_email@example.com', [user_email], fail_silently=False)
                 return HttpResponse("Booking has been removed and an email has been sent to the user.")
             
@@ -1180,7 +1208,8 @@ def handle_request(request):
             # Send an email to the user
             send_mail(subject, message, 'your_email@example.com', [user_email], fail_silently=False)
 
-            return HttpResponse(f"Booking {booking.id} has been {booking.status}, and an email has been sent to the user.")
+            return HttpResponse(f'<script>alert("Booking {booking.id} has been {booking.status}, and an email has been sent to the user."); window.history.back();</script>')
+
     
     # In case the method is not POST, return an appropriate message
     return HttpResponse("Invalid request.")
@@ -1208,7 +1237,7 @@ def rate_worker(request):
                     workers = worker.objects.get(name=worker_name)  # Adjust the query if needed
                     if rating == 'good':
                         workers.rating += 1  # Increment rating
-                    elif rating == 'bad':
+                    elif rating == 'poor':
                         workers.rating -= 1  # Decrement rating, if your logic requires this
                     workers.save()
                     

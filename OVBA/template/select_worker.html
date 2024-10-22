@@ -36,35 +36,34 @@
             background-color: #333;  /* Dark background for cards */
             border: 1px solid #444;  /* Darker border */
             border-radius: 8px;
-            height: 245px;
+            height: 270px;
             width: 250px;  /* Keep the width the same */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             transition: transform 0.3s ease;
             padding: 10px;  /* Reduce padding to shrink card height */
         }
-        
+
         .card-content {
             padding: 10px;  /* Reduce inner padding */
         }
-        
+
         .worker-name {
             font-size: 16px;  /* Decrease font size */
             margin-bottom: 4px;  /* Smaller margin */
         }
-        
+
         .card p {
             font-size: 12px;  /* Reduce font size for text */
             margin: 2px 0;  /* Reduce margin between lines */
         }
-        
+
         .btns {
             padding: 8px 0;  /* Smaller padding for the buttons area */
         }
-        
+
         .btns button {
             padding: 6px 12px;  /* Decrease button size */
         }
-        
 
         .card:hover {
             transform: translateY(-5px);
@@ -124,9 +123,57 @@
         footer a:hover {
             color: #f0e68c;  /* Lighter yellow on hover */
         }
+
+        /* Modal Styles */
+        .modal {
+            display: flex; /* Center the modal */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.7); /* Black with opacity */
+            justify-content: center; /* Center horizontally */
+            align-items: center; /* Center vertically */
+        }
+
+        .modal-content {
+            background-color: #fefefe; /* White background */
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center; /* Center text */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <!-- Modal Structure -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h3 style="color: #1a1a1a;">Worker Performance</h3>
+            <p style="color: #1a1a1a;">This rating reflects the worker's performance based on user reviews.</p>
+            <p style="color: #1a1a1a;">If the rating is negative, it means there have been plenty of negative reviews; conversely, a positive rating indicates satisfactory performance.</p>
+            <button id="ok-button" onclick="showContent()">OK</button>
+        </div>
+    </div>
+
     <h2>Select a Mechanic</h2>
     <div class="container">
         {% for worker in workers %}
@@ -136,7 +183,8 @@
                 <p>Specialization: {{ worker.special }}</p>
                 <p>Distance: {{ worker.distance|floatformat:2 }} km</p>
                 <p>Shop: {{ worker.shopname }}</p>
-                <p>Location: {{ worker.dist }}</p>
+                <p>District: {{ worker.dist }}</p>
+                <p>Location: {{ worker.loca }}</p>
                 <p>Phone: {{ worker.phone }}</p>
                 <p>Email: {{ worker.mail }}</p>
                 <p>Rating: {{ worker.rating}}</p>
@@ -163,8 +211,26 @@
         {% endfor %}
     </div>
     <footer>
-        <p>&copy; 2024 Your Company. All rights reserved.</p>
-        <a href="{% url 'book_mechanic' %}">Back to Booking</a>
+        <p>&copy; 2024 OVBA. All rights reserved.</p>
     </footer>
+
+    <script>
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none'; // Hide the modal
+        }
+
+        // Function to show the main content and hide the modal
+        function showContent() {
+            closeModal(); // Close the modal
+            document.body.style.overflow = 'auto'; // Enable scrolling on the body
+        }
+
+        // Open the modal when the page loads
+        window.onload = function() {
+            document.getElementById('myModal').style.display = 'flex'; // Show the modal
+            document.body.style.overflow = 'hidden'; // Disable scrolling on the body
+        };
+    </script>
 </body>
 </html>
